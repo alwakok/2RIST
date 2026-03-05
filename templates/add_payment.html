@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавить платеж</title>
+    <script>
+        function updatePaymentInfo() {
+            const select = document.getElementById('booking_id');
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (selectedOption.value) {
+                const remaining = selectedOption.getAttribute('data-remaining');
+                const employee = selectedOption.getAttribute('data-employee');
+                const total = selectedOption.getAttribute('data-total');
+
+                document.getElementById('booking_info').innerHTML = `
+                    <p><strong>Информация о бронировании:</strong></p>
+                    <p>Сумма бронирования: ${total} руб.</p>
+                    <p>Остаток к оплате: ${remaining} руб.</p>
+                    <p>Сотрудник: ${employee}</p>
+                    <p><em>Комиссия 5% будет начислена сотруднику ${employee}</em></p>
+                `;
+
+                // Подсказка по максимальной сумме
+                const amountInput = document.getElementById('payment_amount');
+                amountInput.max = remaining;
+                amountInput.placeholder = `Максимум: ${remaining} руб.`;
+            } else {
+                document.getElementById('booking_info').innerHTML = '<p>Выберите бронирование</p>';
+            }
+        }
+
+        function validateAmount(input) {
+            const select = document.getElementById('booking_id');
+            const selectedOption = select.options[select.selectedIndex];
+
+            if (selectedOption.value) {
+                const maxAmount = parseFloat(selectedOption.getAttribute('data-remaining'));
+                const value = parseFloat(input.value);
+
+                if (value > maxAmount) {
+                    alert(`Сумма платежа не может превышать остаток (${maxAmount} руб.)`);
+                    input.value = maxAmount;
+                }
+                if (value <= 0) {
+                    alert('Сумма платежа должна быть больше 0');
+                    input.value = '';
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Добавить платеж</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="color: green;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <p>
+            <label><strong>Выберите бронирование *:</strong></label><br>
+            <select name="booking_id" id="booking_id" required onchange="updatePaymentInfo()" style="width: 400px;">
+                <option value="">-- Выберите бронирование --</option>
+                {% for item in bookings_with_debt %}
+                <option value="{{ item.booking.booking_id }}"
+                        data-remaining="{{ item.remaining }}"
+                        data-employee="{{ item.employee_name }}"
+                        data-total="{{ item.booking.total_price }}">
+                    {{ item.booking.booking_number }} - {{ item.booking.client.last_name }} {{ item.booking.client.first_name }} -
+                    Отель: {{ item.booking.hotel.hotel_name }} -
+                    Остаток: {{ item.remaining }} руб. (Сотрудник: {{ item.employee_name }})
+                </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <div id="booking_info" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0; background-color: #f9f9f9;">
+            <p>Выберите бронирование для просмотра информации</p>
+        </div>
+
+        <p>
+            <label><strong>Сумма платежа *:</strong></label><br>
+            <input type="number" name="payment_amount" id="payment_amount"
+                   step="0.01" min="0.01" required
+                   onchange="validateAmount(this)"
+                   style="width: 200px;">
+        </p>
+
+        <p>
+            <label><strong>Способ оплаты *:</strong></label><br>
+            <select name="payment_method" required style="width: 200px;">
+                <option value="">-- Выберите способ --</option>
+                <option value="Наличные">Наличные</option>
+                <option value="Банковская карта">Банковская карта</option>
+                <option value="Банковский перевод">Банковский перевод</option>
+                <option value="Электронные деньги">Электронные деньги</option>
+            </select>
+        </p>
+
+        <p>
+            <label><strong>Назначение платежа:</strong></label><br>
+            <input type="text" name="payment_purpose" placeholder="Например: Предоплата, Остаток, Полная оплата" style="width: 300px;" value="Оплата бронирования">
+        </p>
+
+        <p>
+            <input type="submit" value="Добавить платеж" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">
+            <a href="/" style="margin-left: 20px;">Вернуться на главную</a>
+        </p>
+    </form>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Туристическое агентство</title>
+</head>
+<body>
+    <h1>Туристическое агентство</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="color: green;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <h2>Навигация:</h2>
+    <p>
+        <a href="/add_client">➕ Добавить клиента</a> |
+        <a href="/add_employee">➕ Добавить сотрудника</a> |
+        <a href="/add_booking">➕ Новое бронирование</a> |
+        <a href="/add_payment">➕ Добавить платеж</a>
+    </p>
+
+    <hr>
+
+    <h2>Аналитика:</h2>
+
+    <!-- Самая популярная страна в этом месяце -->
+    <h3>Самая популярная страна в этом месяце:</h3>
+    <div id="popular_country">Загрузка...</div>
+
+    <!-- Лучший клиент года -->
+    <h3>Лучший клиент года:</h3>
+    <div id="top_client">Загрузка...</div>
+
+    <!-- Статистика по сотрудникам -->
+    <h3>Статистика по сотрудникам (комиссия 5%):</h3>
+    <div id="employee_stats">Загрузка...</div>
+
+    <hr>
+
+    <h2>Клиенты:</h2>
+    <div id="clients">Загрузка клиентов...</div>
+
+    <h2>Сотрудники:</h2>
+    <div id="employees">Загрузка сотрудников...</div>
+
+    <h2>Страны:</h2>
+    <div id="countries">Загрузка стран...</div>
+
+    <h2>Отели с тарифами:</h2>
+    <div id="hotels">Загрузка отелей...</div>
+
+    <h2>Бронирования:</h2>
+    <div id="bookings">Загрузка бронирований...</div>
+
+    <h2>Платежи:</h2>
+    <div id="payments">Загрузка платежей...</div>
+
+    <script>
+        async function loadData() {
+            console.log('Начинаем загрузку данных...');
+
+            try {
+                // Загружаем аналитические данные
+                const [popularRes, topClientRes, employeeStatsRes] = await Promise.all([
+                    fetch('/api/popular_country'),
+                    fetch('/api/top_client_year'),
+                    fetch('/api/employee_stats')
+                ]);
+
+                // Самая популярная страна
+                if (popularRes.ok) {
+                    const popular = await popularRes.json();
+                    if (popular.error) {
+                        document.getElementById('popular_country').innerHTML = '<p>Нет бронирований в этом месяце</p>';
+                    } else {
+                        document.getElementById('popular_country').innerHTML =
+                            `<p><strong>${popular.country}</strong> (${popular.month}) - ${popular.bookings_count} бронирований</p>`;
+                    }
+                } else {
+                    document.getElementById('popular_country').innerHTML = '<p>Ошибка загрузки</p>';
+                }
+
+                // Лучший клиент года
+                if (topClientRes.ok) {
+                    const topClient = await topClientRes.json();
+                    if (topClient.error) {
+                        document.getElementById('top_client').innerHTML = '<p>Нет бронирований в этом году</p>';
+                    } else {
+                        document.getElementById('top_client').innerHTML =
+                            `<p><strong>${topClient.client}</strong> - ${topClient.total_spent.toLocaleString()} руб. (${topClient.bookings_count} бронирований)</p>
+                             <p>Телефон: ${topClient.phone} | Email: ${topClient.email}</p>`;
+                    }
+                } else {
+                    document.getElementById('top_client').innerHTML = '<p>Ошибка загрузки</p>';
+                }
+
+                // Статистика по сотрудникам
+                if (employeeStatsRes.ok) {
+                    const stats = await employeeStatsRes.json();
+                    let html = '<table border="1" cellpadding="5"><tr><th>Сотрудник</th><th>Комиссия</th><th>Продажи</th><th>Заработано комиссии</th></tr>';
+                    stats.forEach(s => {
+                        html += `<tr>
+                            <td>${s.name}</td>
+                            <td>${s.commission_rate}%</td>
+                            <td>${s.confirmed_bookings} броней / ${s.total_sales.toLocaleString()} руб.</td>
+                            <td><strong>${s.total_commission.toLocaleString()} руб.</strong></td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('employee_stats').innerHTML = html;
+                } else {
+                    document.getElementById('employee_stats').innerHTML = '<p>Ошибка загрузки</p>';
+                }
+
+            } catch (error) {
+                console.error('Ошибка загрузки аналитики:', error);
+                document.getElementById('popular_country').innerHTML = '<p>Ошибка загрузки</p>';
+                document.getElementById('top_client').innerHTML = '<p>Ошибка загрузки</p>';
+                document.getElementById('employee_stats').innerHTML = '<p>Ошибка загрузки</p>';
+            }
+
+            // Загружаем остальные данные
+            try {
+                const [clientsRes, employeesRes, countriesRes, hotelsRes, bookingsRes, paymentsRes] = await Promise.all([
+                    fetch('/api/clients'),
+                    fetch('/api/employees'),
+                    fetch('/api/countries'),
+                    fetch('/api/hotels'),
+                    fetch('/api/bookings'),
+                    fetch('/api/payments')
+                ]);
+
+                // Клиенты
+                if (clientsRes.ok) {
+                    const clients = await clientsRes.json();
+                    let html = '<table border="1" cellpadding="5"><tr><th>ID</th><th>ФИО</th><th>Паспорт</th><th>Телефон</th><th>Email</th></tr>';
+                    clients.forEach(c => {
+                        html += `<tr>
+                            <td>${c.id}</td>
+                            <td>${c.last_name} ${c.first_name} ${c.middle_name || ''}</td>
+                            <td>${c.passport}</td>
+                            <td>${c.phone}</td>
+                            <td>${c.email || '-'}</td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('clients').innerHTML = html;
+                }
+
+                // Сотрудники
+                if (employeesRes.ok) {
+                    const employees = await employeesRes.json();
+                    let html = '<table border="1" cellpadding="5"><tr><th>ID</th><th>ФИО</th><th>Должность</th><th>Комиссия</th><th>Телефон</th><th>Email</th></tr>';
+                    employees.forEach(e => {
+                        html += `<tr>
+                            <td>${e.id}</td>
+                            <td>${e.last_name} ${e.first_name}</td>
+                            <td>${e.position || 'Турагент'}</td>
+                            <td>${e.commission_rate}%</td>
+                            <td>${e.phone || '-'}</td>
+                            <td>${e.email || '-'}</td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('employees').innerHTML = html;
+                }
+
+                // Страны
+                if (countriesRes.ok) {
+                    const countries = await countriesRes.json();
+                    let html = '<table border="1" cellpadding="5"><tr><th>ID</th><th>Страна</th><th>Код</th><th>Виза</th><th>Валюта</th><th>Язык</th></tr>';
+                    countries.forEach(c => {
+                        html += `<tr>
+                            <td>${c.id}</td>
+                            <td>${c.name}</td>
+                            <td>${c.code || '-'}</td>
+                            <td>${c.visa_required ? 'Нужна' : 'Не нужна'}</td>
+                            <td>${c.currency || '-'}</td>
+                            <td>${c.language || '-'}</td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('countries').innerHTML = html;
+                }
+
+                // Отели
+                if (hotelsRes.ok) {
+                    const hotels = await hotelsRes.json();
+                    let html = '<table border="1" cellpadding="5"><tr><th>ID</th><th>Отель</th><th>Страна</th><th>Город</th><th>Звезды</th><th>Тарифы</th></tr>';
+                    hotels.forEach(h => {
+                        html += `<tr>
+                            <td>${h.id}</td>
+                            <td>${h.name}</td>
+                            <td>${h.country_name || '-'}</td>
+                            <td>${h.city || '-'}</td>
+                            <td>${'★'.repeat(h.stars)}</td>
+                            <td>
+                                Стандарт: ${h.rates.Standard}<br>
+                                Делюкс: ${h.rates.Deluxe}<br>
+                                Люкс: ${h.rates.Suite}<br>
+                                Семейный: ${h.rates.Family}
+                            </td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('hotels').innerHTML = html;
+                }
+
+                // Бронирования
+                if (bookingsRes.ok) {
+                    const bookings = await bookingsRes.json();
+                    let html = '<table border="1" cellpadding="5"><tr><th>Номер</th><th>Клиент</th><th>Отель</th><th>Даты</th><th>Сумма</th><th>Статус</th><th>Сотрудник</th></tr>';
+                    bookings.forEach(b => {
+                        html += `<tr>
+                            <td>${b.number || b.id}</td>
+                            <td>${b.client || '-'}</td>
+                            <td>${b.hotel || '-'}</td>
+                            <td>${b.check_in} - ${b.check_out}</td>
+                            <td>${b.total.toLocaleString()} руб.</td>
+                            <td>${b.status}</td>
+                            <td>${b.employee || 'Не назначен'}</td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('bookings').innerHTML = html;
+                }
+
+                // Платежи
+                if (paymentsRes.ok) {
+                    const payments = await paymentsRes.json();
+                    let html = '<table border="1" cellpadding="5"><tr><th>Номер</th><th>Бронирование</th><th>Клиент</th><th>Сумма</th><th>Метод</th><th>Сотрудник</th></tr>';
+                    payments.forEach(p => {
+                        html += `<tr>
+                            <td>${p.number || p.id}</td>
+                            <td>${p.booking || '-'}</td>
+                            <td>${p.client || '-'}</td>
+                            <td>${p.amount.toLocaleString()} руб.</td>
+                            <td>${p.method || '-'}</td>
+                            <td>${p.employee || 'Не назначен'}</td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('payments').innerHTML = html;
+                }
+
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+            }
+
+            console.log('Загрузка данных завершена');
+        }
+
+        // Загружаем данные при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

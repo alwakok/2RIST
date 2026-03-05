@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавить сотрудника</title>
+</head>
+<body>
+    <h1>Добавить нового сотрудника (турагента)</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="color: green;">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <h3>Личные данные:</h3>
+        <p>
+            <label>Фамилия *:</label><br>
+            <input type="text" name="last_name" required>
+        </p>
+        <p>
+            <label>Имя *:</label><br>
+            <input type="text" name="first_name" required>
+        </p>
+        <p>
+            <label>Должность:</label><br>
+            <input type="text" name="position" value="Турагент">
+        </p>
+
+        <h3>Контакты:</h3>
+        <p>
+            <label>Телефон:</label><br>
+            <input type="text" name="phone" placeholder="+7 (999) 123-45-67">
+        </p>
+        <p>
+            <label>Email:</label><br>
+            <input type="email" name="email" placeholder="employee@agency.ru">
+        </p>
+
+        <h3>Работа:</h3>
+        <p>
+            <label>Дата найма:</label><br>
+            <input type="date" name="hire_date" value="2024-01-01">
+        </p>
+        <p>
+            <label>Ставка комиссии (%):</label><br>
+            <input type="number" name="commission_rate" value="5.0" step="0.1" min="0" max="100">
+        </p>
+
+        <p>
+            <input type="submit" value="Добавить сотрудника">
+            <a href="/">Вернуться на главную</a>
+        </p>
+    </form>
+</body>
+</html>

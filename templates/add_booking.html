@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Новое бронирование</title>
+    <script>
+        async function calculatePrice() {
+            const hotelId = document.getElementById('hotel_id').value;
+            const checkIn = document.getElementById('check_in').value;
+            const checkOut = document.getElementById('check_out').value;
+            const roomType = document.getElementById('room_type').value;
+
+            if (!hotelId⠞⠞⠞⠞⠞⠵⠺⠵⠺⠵⠞⠟!checkOut || !roomType) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/calculate_price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        hotel_id: hotelId,
+                        check_in: checkIn,
+                        check_out: checkOut,
+                        room_type: roomType
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    document.getElementById('price_info').innerHTML = <span style="color: red;">${data.error}</span>;
+                } else {
+                    document.getElementById('price_info').innerHTML = `
+                        <strong>Ночей:</strong> ${data.nights}<br>
+                        <strong>Тариф:</strong> ${data.daily_rate} руб./сутки<br>
+                        <strong>Итого:</strong> ${data.total_price} руб.
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('price_info').innerHTML = '<span style="color: red;">Ошибка расчета</span>';
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Новое бронирование</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <h3>Выбор тура:</h3>
+        <p>
+            <label>Клиент *:</label><br>
+            <select name="client_id" required>
+                <option value="">-- Выберите клиента --</option>
+                {% for client in clients %}
+                <option value="{{ client.client_id }}">{{ client.last_name }} {{ client.first_name }}</option>
+                {% endfor %}
+            </select>
+        </p>
+        <p>
+            <label>Отель *:</label><br>
+            <select name="hotel_id" id="hotel_id" required onchange="calculatePrice()">
+                <option value="">-- Выберите отель --</option>
+                {% for hotel in hotels %}
+                <option value="{{ hotel.hotel_id }}">{{ hotel.hotel_name }} ({{ hotel.city_name }})</option>
+                {% endfor %}
+            </select>
+        </p>
+        <p>
+            <label>Турагент:</label><br>
+            <select name="employee_id">
+                <option value="">-- Не назначен --</option>
+                {% for emp in employees %}
+                <option value="{{ emp.employee_id }}">{{ emp.last_name }} {{ emp.first_name }}</option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <h3>Даты:</h3>
+        <p>
+            <label>Дата заезда *:</label><br>
+            <input type="date" name="check_in" id="check_in" required onchange="calculatePrice()">
+        </p>
+        <p>
+            <label>Дата выезда *:</label><br>
+            <input type="date" name="check_out" id="check_out" required onchange="calculatePrice()">
+        </p>
+
+        <h3>Гости:</h3>
+        <p>
+            <label>Количество взрослых *:</label><br>
+            <input type="number" name="adults_count" value="2" min="1" max="10" required>
+        </p>
+        <p>
+            <label>Количество детей:</label><br>
+            <input type="number" name="children_count" value="0" min="0" max="10">
+        </p>
+      <h3>Номер:</h3>
+        <p>
+            <label>Тип номера *:</label><br>
+            <select name="room_type" id="room_type" required onchange="calculatePrice()">
+                <option value="">-- Выберите тип --</option>
+                <option value="Standard">Стандарт</option>
+                <option value="Deluxe">Делюкс</option>
+                <option value="Suite">Люкс</option>
+                <option value="Family">Семейный</option>
+            </select>
+        </p>
+
+        <h3>Информация о стоимости:</h3>
+        <div id="price_info" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+            Выберите отель, даты и тип номера для расчета стоимости
+        </div>
+
+        <p>
+            <label>Особые пожелания:</label><br>
+            <textarea name="special_requests" rows="4" cols="50"></textarea>
+        </p>
+
+        <p>
+            <input type="submit" value="Создать бронирование">
+            <a href="/">Вернуться на главную</a>
+        </p>
+    </form>
+</body>
+</html>

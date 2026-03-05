@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добавить клиента</title>
+</head>
+<body>
+    <h1>Добавить нового клиента</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="color: {% if 'error' in messages[0] %}red{% else %}green{% endif %};">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <h3>Личные данные:</h3>
+        <p>
+            <label>Фамилия *:</label><br>
+            <input type="text" name="last_name" required value="{{ request.form.last_name or '' }}">
+        </p>
+        <p>
+            <label>Имя *:</label><br>
+            <input type="text" name="first_name" required value="{{ request.form.first_name or '' }}">
+        </p>
+        <p>
+            <label>Отчество:</label><br>
+            <input type="text" name="middle_name" value="{{ request.form.middle_name or '' }}">
+        </p>
+        <p>
+            <label>Дата рождения *:</label><br>
+            <input type="date" name="birth_date" required value="{{ request.form.birth_date or '' }}">
+        </p>
+
+        <h3>Паспортные данные:</h3>
+        <p>
+            <label>Номер паспорта *:</label><br>
+            <input type="text" name="passport_number" required placeholder="1234 567890" value="{{ request.form.passport_number or '' }}">
+            <br><small>Формат: 1234 567890</small>
+        </p>
+        <p>
+            <label>Кем выдан:</label><br>
+            <input type="text" name="passport_issued" value="{{ request.form.passport_issued or 'УФМС России' }}">
+        </p>
+        <p>
+            <label>Дата выдачи:</label><br>
+            <input type="date" name="passport_date" value="{{ request.form.passport_date or '' }}">
+        </p>
+
+        <h3>Контакты:</h3>
+        <p>
+            <label>Телефон *:</label><br>
+            <input type="text" name="phone" required placeholder="+7 (999) 123-45-67" value="{{ request.form.phone or '' }}">
+            <br><small>Формат: +7 (999) 123-45-67</small>
+        </p>
+        <p>
+            <label>Email:</label><br>
+            <input type="email" name="email" placeholder="example@mail.com" value="{{ request.form.email or '' }}">
+        </p>
+        <p>
+            <label>Адрес:</label><br>
+            <textarea name="address" rows="3" cols="40" placeholder="Город, улица, дом, квартира">{{ request.form.address or '' }}</textarea>
+        </p>
+
+        <p>
+            <input type="submit" value="Добавить клиента">
+            <a href="/" style="margin-left: 20px;">Вернуться на главную</a>
+        </p>
+    </form>
+</body>
+</html>
