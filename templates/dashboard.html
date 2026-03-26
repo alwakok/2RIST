@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Личный кабинет</h1>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Информация о пользователе</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Мои бронирования</h5>
+                </div>
+                <div class="card-body">
+                    {% if bookings %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Отель</th>
+                                    <th>Тариф</th>
+                                    <th>Даты</th>
+                                    <th>Стоимость</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.hotel.name }}</td>
+                                    <td>{{ booking.tariff.name }}</td>
+                                    <td>{{ booking.check_in }} - {{ booking.check_out }}</td>
+                                    <td>{{ booking.total_price }} ₽</td>
+                                    <td>
+                                        {% if booking.status == 'confirmed' %}
+                                        <span class="badge bg-success">Подтверждено</span>
+                                        {% elif booking.status == 'pending' %}
+                                        <span class="badge bg-warning">Ожидает оплаты</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Отменено</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p>У вас пока нет бронирований.</p>
+                    <a href="{{ url_for('hotels') }}" class="btn btn-primary">Найти отель</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

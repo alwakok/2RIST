@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ hotel.image_url }}" class="img-fluid rounded" alt="{{ hotel.name }}">
+        </div>
+        <div class="col-md-6">
+            <h1>{{ hotel.name }}</h1>
+            <p><i class="fas fa-map-marker-alt"></i> {{ hotel.city }}, {{ hotel.address }}</p>
+            <p class="lead">{{ hotel.description }}</p>
+        </div>
+    </div>
+
+    <h2 class="mt-5 mb-4">Тарифы и цены</h2>
+    <div class="row">
+        {% for tariff in hotel.tariffs %}
+        <div class="col-md-3 mb-4">
+            <div class="card tariff-card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">{{ tariff.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ tariff.description }}</p>
+                    <h3 class="text-primary">{{ tariff.price_per_night }} ₽ <small>/ ночь</small></h3>
+                    {% if session.user_id and not session.is_admin %}
+                    <button class="btn btn-book btn-primary mt-3" data-tariff-id="{{ tariff.id }}" data-tariff-name="{{ tariff.name }}" data-price="{{ tariff.price_per_night }}">
+                        Забронировать
+                    </button>
+                    {% elif not session.user_id %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary mt-3">Войдите чтобы забронировать</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Модальное окно для бронирования -->
+<div class="modal fade" id="bookingModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Бронирование отеля</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="bookingForm">
+                    <div class="mb-3">
+                        <label class="form-label">Тариф</label>
+                        <input type="text" class="form-control" id="tariffName" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Дата заезда</label>
+                        <input type="date" class="form-control" id="checkIn" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Дата выезда</label>
+                        <input type="date" class="form-control" id="checkOut" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Количество гостей</label>
+                        <input type="number" class="form-control" id="guests" min="1" max="10" value="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Общая стоимость</label>
+                        <input type="text" class="form-control" id="totalPrice" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="confirmBooking">Подтвердить бронь</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

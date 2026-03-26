@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Мои бронирования</h1>
+    {% if bookings %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Отель</th>
+                    <th>Тариф</th>
+                    <th>Заезд</th>
+                    <th>Выезд</th>
+                    <th>Гости</th>
+                    <th>Стоимость</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.hotel.name }}</td>
+                    <td>{{ booking.tariff.name }}</td>
+                    <td>{{ booking.check_in }}</td>
+                    <td>{{ booking.check_out }}</td>
+                    <td>{{ booking.guests }}</td>
+                    <td>{{ booking.total_price }} ₽</td>
+                    <td>
+                        {% if booking.status == 'confirmed' %}
+                        <span class="badge bg-success">Подтверждено</span>
+                        {% elif booking.status == 'pending' %}
+                        <span class="badge bg-warning">Ожидает оплаты</span>
+                        {% else %}
+                        <span class="badge bg-danger">Отменено</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        У вас пока нет бронирований. <a href="{{ url_for('hotels') }}">Начните путешествие!</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

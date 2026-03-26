@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Добавить платеж</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <p><strong>Бронирование #{{ booking.id }}</strong></p>
+                        <p>Отель: {{ booking.hotel.name }}</p>
+                        <p>Пользователь: {{ booking.user.username }}</p>
+                        <p>Сумма: {{ booking.total_price }} ₽</p>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Сумма платежа</label>
+                            <input type="number" class="form-control" name="amount" value="{{ booking.total_price }}" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Способ оплаты</label>
+                            <select class="form-control" name="payment_method" required>
+                                <option value="card">Банковская карта</option>
+                                <option value="cash">Наличные</option>
+                                <option value="transfer">Банковский перевод</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Подтвердить платеж</button>
+                        <a href="{{ url_for('admin_bookings') }}" class="btn btn-secondary">Отмена</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

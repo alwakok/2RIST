@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Добавить отель</h1>
+    
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Основная информация</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Название отеля</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Город</label>
+                            <input type="text" class="form-control" name="city" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Адрес</label>
+                            <input type="text" class="form-control" name="address" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Описание</label>
+                            <textarea class="form-control" name="description" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">URL изображения</label>
+                            <input type="text" class="form-control" name="image_url" placeholder="https://example.com/image.jpg">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>Тарифы</h5>
+                        <button type="button" class="btn btn-sm btn-success" onclick="addTariff()">Добавить тариф</button>
+                    </div>
+                    <div class="card-body" id="tariffsContainer">
+                        <div class="tariff-item mb-3">
+                            <input type="text" class="form-control mb-2" name="tariff_name[]" placeholder="Название тарифа (Люкс, Эконом и т.д.)" required>
+                            <input type="number" class="form-control mb-2" name="tariff_price[]" placeholder="Цена за ночь" step="0.01" required>
+                            <textarea class="form-control" name="tariff_description[]" placeholder="Описание тарифа" rows="2"></textarea>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Сохранить отель</button>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+
+<script>
+let tariffCount = 1;
+
+function addTariff() {
+    const container = document.getElementById('tariffsContainer');
+    const newTariff = document.createElement('div');
+    newTariff.className = 'tariff-item mb-3';
+    newTariff.innerHTML = `
+        <input type="text" class="form-control mb-2" name="tariff_name[]" placeholder="Название тарифа (Люкс, Эконом и т.д.)" required>
+        <input type="number" class="form-control mb-2" name="tariff_price[]" placeholder="Цена за ночь" step="0.01" required>
+        <textarea class="form-control" name="tariff_description[]" placeholder="Описание тарифа" rows="2"></textarea>
+        <button type="button" class="btn btn-sm btn-danger mt-2" onclick="this.parentElement.remove()">Удалить</button>
+        <hr>
+    `;
+    container.appendChild(newTariff);
+}
+</script>
+{% endblock %}

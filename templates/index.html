@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section text-center py-5 mb-5">
+    <div class="container">
+        <h1 class="display-4">Добро пожаловать в 2RIST</h1>
+        <p class="lead">Ваше идеальное путешествие начинается здесь</p>
+        <a href="{{ url_for('hotels') }}" class="btn btn-primary btn-lg">Найти отель</a>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="text-center mb-4">Популярные отели</h2>
+    <div class="row">
+        {% for hotel in hotels %}
+        <div class="col-md-4 mb-4">
+            <div class="card hotel-card h-100">
+                <img src="{{ hotel.image_url }}" class="card-img-top" alt="{{ hotel.name }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ hotel.name }}</h5>
+                    <p class="card-text"><i class="fas fa-map-marker-alt"></i> {{ hotel.city }}</p>
+                    <p class="card-text">{{ hotel.description[:100] }}...</p>
+                    <a href="{{ url_for('hotel_detail', hotel_id=hotel.id) }}" class="btn btn-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
