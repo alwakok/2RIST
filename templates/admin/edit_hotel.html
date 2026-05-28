@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}Редактировать отель | {{ hotel.name }} | 2RIST{% endblock %}
+{% block content %}
+<div class="admin-layout">
+    <div class="admin-sidebar">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-orange);">Админ-панель</h3>
+        <ul class="admin-menu">
+            <li><a href="{{ url_for('admin_panel') }}">📊 Дашборд</a></li>
+            <li><a href="{{ url_for('admin_hotels') }}" class="active">🏨 Отели</a></li>
+            <li><a href="{{ url_for('admin_bookings') }}">📋 Бронирования</a></li>
+            <li><a href="{{ url_for('index') }}">🏠 На сайт</a></li>
+        </ul>
+    </div>
+
+    <div class="admin-content">
+        <h2 style="margin-bottom: 1.5rem;">Редактировать: {{ hotel.name }}</h2>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Название отеля *</label>
+                    <input type="text" name="name" value="{{ hotel.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Страна *</label>
+                    <input type="text" name="country" value="{{ hotel.country }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Город *</label>
+                    <input type="text" name="city" value="{{ hotel.city }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Адрес</label>
+                    <input type="text" name="address" value="{{ hotel.address or '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Звёзды *</label>
+                    <select name="stars" required>
+                        {% for i in [3,4,5] %}
+                        <option value="{{ i }}" {% if hotel.stars == i %}selected{% endif %}>{{ i }} звезды</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Рейтинг</label>
+                    <input type="number" name="rating" min="0" max="5" step="0.1" value="{{ hotel.rating }}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Описание отеля</label>
+                <textarea name="description" rows="4">{{ hotel.description or '' }}</textarea>
+            </div>
+
+            <h3 style="margin: 1.5rem 0 1rem;">Изображения отеля</h3>
+
+            {% set images = [hotel.image_url, hotel.image_url_2, hotel.image_url_3, hotel.image_url_4] %}
+            {% for i in range(4) %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: #F7F9FC; border-radius: 8px; align-items: start;">
+                <div>
+                    <div class="form-group" style="margin-bottom: 0.5rem;">
+                        <label>📷 Изображение {{ i+1 }} — загрузить файл</label>
+                        <input type="file" name="image_file{% if i > 0 %}_{{ i+1 }}{% endif %}" accept="image/*" style="padding: 0.5rem;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>или вставить ссылку</label>
+                        <input type="text" name="image_url{% if i > 0 %}_{{ i+1 }}{% endif %}" value="{{ images[i] or '' }}" placeholder="https://...">
+                    </div>
+                </div>
+                {% if images[i] %}
+                <div style="text-align: center;">
+                    <p style="font-size: 0.8rem; color: var(--text-gray); margin-bottom: 0.3rem;">Текущее:</p>
+                    <img src="{{ images[i] }}" style="width: 150px; height: 100px; object-fit: cover; border-radius: 6px;">
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- Тарифы -->
+            <div style="margin: 1.5rem 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Тарифы</h3>
+                    <button type="button" onclick="addTariffField()" class="btn-book" style="width: auto; padding: 0.5rem 1.5rem;">+ Добавить тариф</button>
+                </div>
+
+                <div id="tariffs-container">
+                    {% for tariff in hotel.tariffs %}
+                    <div class="tariff-admin-item">
+                        <h4 style="margin-bottom: 0.8rem;">Тариф {{ loop.index }}</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Название тарифа *</label>
+                                <input type="text" name="tariff_name[]" value="{{ tariff.name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Цена за ночь (₽) *</label>
+                                <input type="number" name="tariff_price[]" min="500" step="100" value="{{ tariff.price_per_night|int }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Тип питания</label>
+                                <select name="tariff_meal[]">
+                                    {% for meal in ['Без питания', 'Завтрак', 'Завтрак и обед', 'Завтрак и ужин', 'Завтрак, обед и ужин', 'Всё включено', 'Ультра всё включено'] %}
+                                    <option value="{{ meal }}" {% if tariff.meal_type == meal %}selected{% endif %}>{{ meal }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Макс. гостей</label>
+                                <input type="number" name="tariff_guests[]" min="1" max="10" value="{{ tariff.max_guests }}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Описание тарифа</label>
+                            <textarea name="tariff_description[]" rows="2">{{ tariff.description or '' }}</textarea>
+                        </div>
+
+                        <!-- Фото номера -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                            {% set t_index = loop.index0 %}
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.8rem;">📷 Фото номера 1</label>
+                                <input type="file" name="tariff_image_{{ t_index }}" accept="image/*" style="padding: 0.3rem;">
+                                <input type="text" name="tariff_image_url_{{ t_index }}" value="{{ tariff.image_url or '' }}" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                                {% if tariff.image_url %}<img src="{{ tariff.image_url }}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; margin-top: 0.2rem;">{% endif %}
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.8rem;">📷 Фото номера 2</label>
+                                <input type="file" name="tariff_image_{{ t_index }}_2" accept="image/*" style="padding: 0.3rem;">
+                                <input type="text" name="tariff_image_url_{{ t_index }}_2" value="{{ tariff.image_url_2 or '' }}" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                                {% if tariff.image_url_2 %}<img src="{{ tariff.image_url_2 }}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; margin-top: 0.2rem;">{% endif %}
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.8rem;">📷 Фото номера 3</label>
+                                <input type="file" name="tariff_image_{{ t_index }}_3" accept="image/*" style="padding: 0.3rem;">
+                                <input type="text" name="tariff_image_url_{{ t_index }}_3" value="{{ tariff.image_url_3 or '' }}" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                                {% if tariff.image_url_3 %}<img src="{{ tariff.image_url_3 }}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; margin-top: 0.2rem;">{% endif %}
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="this.parentElement.remove()" class="btn-delete-tariff">🗑️ Удалить тариф</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-submit" style="width: auto; padding: 0.8rem 3rem;">💾 Сохранить изменения</button>
+                <a href="{{ url_for('admin_hotels') }}" class="btn-login" style="padding: 0.8rem 2rem; text-align: center;">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function addTariffField() {
+    var container = document.getElementById('tariffs-container');
+    var index = container.children.length;
+    var html = `
+        <div class="tariff-admin-item">
+            <h4 style="margin-bottom: 0.8rem;">Тариф ${index + 1}</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group"><label>Название тарифа *</label><input type="text" name="tariff_name[]" required></div>
+                <div class="form-group"><label>Цена за ночь (₽) *</label><input type="number" name="tariff_price[]" min="500" step="100" required></div>
+                <div class="form-group">
+                    <label>Тип питания</label>
+                    <select name="tariff_meal[]">
+                        <option value="Без питания">Без питания</option>
+                        <option value="Завтрак">Завтрак</option>
+                        <option value="Завтрак и обед">Завтрак и обед</option>
+                        <option value="Завтрак и ужин">Завтрак и ужин</option>
+                        <option value="Завтрак, обед и ужин">Завтрак, обед и ужин</option>
+                        <option value="Всё включено">Всё включено</option>
+                        <option value="Ультра всё включено">Ультра всё включено</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Макс. гостей</label><input type="number" name="tariff_guests[]" min="1" max="10" value="2"></div>
+            </div>
+            <div class="form-group"><label>Описание тарифа</label><textarea name="tariff_description[]" rows="2"></textarea></div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem;">📷 Фото номера 1</label>
+                    <input type="file" name="tariff_image_${index}" accept="image/*" style="padding: 0.3rem;">
+                    <input type="text" name="tariff_image_url_${index}" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem;">📷 Фото номера 2</label>
+                    <input type="file" name="tariff_image_${index}_2" accept="image/*" style="padding: 0.3rem;">
+                    <input type="text" name="tariff_image_url_${index}_2" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem;">📷 Фото номера 3</label>
+                    <input type="file" name="tariff_image_${index}_3" accept="image/*" style="padding: 0.3rem;">
+                    <input type="text" name="tariff_image_url_${index}_3" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                </div>
+            </div>
+
+            <button type="button" onclick="this.parentElement.remove()" class="btn-delete-tariff">🗑️ Удалить тариф</button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Управление отелями | 2RIST{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <div class="admin-sidebar">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-orange);">Админ-панель</h3>
+        <ul class="admin-menu">
+            <li><a href="{{ url_for('admin_panel') }}">📊 Дашборд</a></li>
+            <li><a href="{{ url_for('admin_hotels') }}" class="active">🏨 Отели</a></li>
+            <li><a href="{{ url_for('admin_bookings') }}">📋 Бронирования</a></li>
+            <li><a href="{{ url_for('index') }}">🏠 На сайт</a></li>
+        </ul>
+    </div>
+
+    <div class="admin-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2>Управление отелями</h2>
+            <a href="{{ url_for('admin_add_hotel') }}" class="btn-book" style="width: auto; padding: 0.6rem 1.5rem;">+ Добавить отель</a>
+        </div>
+
+        {% if hotels %}
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Город</th>
+                        <th>Страна</th>
+                        <th>Звёзды</th>
+                        <th>Рейтинг</th>
+                        <th>Тарифы</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hotel in hotels %}
+                    <tr>
+                        <td>#{{ hotel.id }}</td>
+                        <td><strong>{{ hotel.name }}</strong></td>
+                        <td>{{ hotel.city }}</td>
+                        <td>{{ hotel.country }}</td>
+                        <td>{% for i in range(hotel.stars) %}★{% endfor %}</td>
+                        <td>{{ "%.1f"|format(hotel.rating) }}</td>
+                        <td>{{ hotel.tariffs|length }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_edit_hotel', hotel_id=hotel.id) }}" class="btn-sm btn-edit">✏️</a>
+                            <a href="{{ url_for('admin_delete_hotel', hotel_id=hotel.id) }}" class="btn-sm btn-delete" onclick="return confirm('Удалить отель {{ hotel.name }}?')">🗑️</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: var(--text-gray); padding: 3rem;">Нет отелей</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

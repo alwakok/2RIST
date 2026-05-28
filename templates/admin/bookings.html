@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Бронирования | 2RIST{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <div class="admin-sidebar">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-orange);">Админ-панель</h3>
+        <ul class="admin-menu">
+            <li><a href="{{ url_for('admin_panel') }}">📊 Дашборд</a></li>
+            <li><a href="{{ url_for('admin_hotels') }}">🏨 Отели</a></li>
+            <li><a href="{{ url_for('admin_bookings') }}" class="active">📋 Бронирования</a></li>
+            <li><a href="{{ url_for('index') }}">🏠 На сайт</a></li>
+        </ul>
+    </div>
+
+    <div class="admin-content">
+        <h2 style="margin-bottom: 1.5rem;">Все бронирования</h2>
+
+        {% if bookings %}
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Пользователь</th>
+                        <th>Отель</th>
+                        <th>Тариф</th>
+                        <th>Даты</th>
+                        <th>Сумма</th>
+                        <th>Оплачено</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td>#{{ booking.id }}</td>
+                        <td>
+                            <strong>{{ booking.user.full_name or booking.user.username }}</strong>
+                            <br><small style="color: var(--text-gray);">{{ booking.user.email }}</small>
+                        </td>
+                        <td>{{ booking.hotel.name }}</td>
+                        <td><span style="background: var(--primary-yellow); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">{{ booking.tariff.name }}</span></td>
+                        <td>
+                            {{ booking.check_in.strftime('%d.%m.%Y') }}
+                            <br>→ {{ booking.check_out.strftime('%d.%m.%Y') }}
+                            <br><small style="color: var(--text-gray);">{{ (booking.check_out - booking.check_in).days }} ночей</small>
+                        </td>
+                        <td><strong>{{ "%.0f"|format(booking.total_price)|int }} ₽</strong></td>
+                        <td>
+                            {% set total_paid = booking.payments|sum(attribute='amount') %}
+                            {% if total_paid > 0 %}
+                            <span style="color: var(--success); font-weight: 500;">{{ "%.0f"|format(total_paid)|int }} ₽</span>
+                            {% else %}
+                            <span style="color: var(--danger);">0 ₽</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="booking-status-badge status-{{ booking.status }}">
+                                {% if booking.status == 'pending' %}⏳ Ожидает
+                                {% elif booking.status == 'confirmed' %}✅ Подтверждено
+                                {% elif booking.status == 'paid' %}💰 Оплачено
+                                {% elif booking.status == 'cancelled' %}❌ Отменено
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if booking.status != 'paid' and booking.status != 'cancelled' %}
+                            <button onclick="openPaymentModal({{ booking.id }}, {{ booking.total_price }})"
+                                    class="btn-sm btn-pay">💳 Платёж</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+            <h3>Нет бронирований</h3>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Модальное окно платежа -->
+<div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 420px;">
+        <h3 style="margin-bottom: 1.5rem;">💳 Добавить платёж</h3>
+        <form id="paymentForm" method="POST">
+            <div class="form-group">
+                <label>Сумма платежа (₽) *</label>
+                <input type="text" name="amount" id="paymentAmount" required
+                       placeholder="Введите сумму"
+                       style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: 4px; font-size: 1rem;">
+            </div>
+            <div class="form-group">
+                <label>Способ оплаты</label>
+                <select name="payment_method" style="width: 100%; padding: 0.7rem; border: 1px solid var(--border-color); border-radius: 4px;">
+                    <option value="card">💳 Банковская карта</option>
+                    <option value="cash">💵 Наличные</option>
+                    <option value="transfer">🏦 Банковский перевод</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-submit" style="flex: 1;">Подтвердить</button>
+                <button type="button" onclick="closePaymentModal()" class="btn-login" style="flex: 1; text-align: center;">Отмена</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openPaymentModal(bookingId, totalPrice) {
+    document.getElementById('paymentForm').action = '/admin/booking/' + bookingId + '/payment';
+    document.getElementById('paymentAmount').placeholder = 'Сумма к оплате: ' + totalPrice.toLocaleString() + ' ₽';
+    document.getElementById('paymentModal').style.display = 'flex';
+}
+
+function closePaymentModal() {
+    document.getElementById('paymentModal').style.display = 'none';
+}
+
+document.getElementById('paymentModal').addEventListener('click', function(e) {
+    if (e.target === this) closePaymentModal();
+});
+</script>
+{% endblock %}

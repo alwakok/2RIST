@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Добавить отель | 2RIST{% endblock %}
+{% block content %}
+<div class="admin-layout">
+    <div class="admin-sidebar">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-orange);">Админ-панель</h3>
+        <ul class="admin-menu">
+            <li><a href="{{ url_for('admin_panel') }}">📊 Дашборд</a></li>
+            <li><a href="{{ url_for('admin_hotels') }}" class="active">🏨 Отели</a></li>
+            <li><a href="{{ url_for('admin_bookings') }}">📋 Бронирования</a></li>
+            <li><a href="{{ url_for('index') }}">🏠 На сайт</a></li>
+        </ul>
+    </div>
+
+    <div class="admin-content">
+        <h2 style="margin-bottom: 1.5rem;">Добавить новый отель</h2>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Название отеля *</label>
+                    <input type="text" name="name" required placeholder="Rixos Premium Belek">
+                </div>
+                <div class="form-group">
+                    <label>Страна *</label>
+                    <input type="text" name="country" required placeholder="Турция">
+                </div>
+                <div class="form-group">
+                    <label>Город *</label>
+                    <input type="text" name="city" required placeholder="Белек">
+                </div>
+                <div class="form-group">
+                    <label>Адрес</label>
+                    <input type="text" name="address" placeholder="ул. Курортная, 1">
+                </div>
+                <div class="form-group">
+                    <label>Звёзды *</label>
+                    <select name="stars" required>
+                        <option value="3">3 звезды</option>
+                        <option value="4" selected>4 звезды</option>
+                        <option value="5">5 звезд</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Рейтинг</label>
+                    <input type="number" name="rating" min="0" max="5" step="0.1" value="4.5">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Описание отеля</label>
+                <textarea name="description" rows="4" placeholder="Подробное описание..."></textarea>
+            </div>
+
+            <!-- Изображения отеля -->
+            <h3 style="margin: 1.5rem 0 1rem;">Изображения отеля</h3>
+            <p style="font-size: 0.85rem; color: var(--text-gray); margin-bottom: 1rem;">Загрузите файлы или вставьте ссылки.</p>
+
+            {% for i in range(1, 5) %}
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: #F7F9FC; border-radius: 8px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>📷 Изображение {{ i }} — загрузить файл</label>
+                    <input type="file" name="image_file{% if i > 1 %}_{{ i }}{% endif %}" accept="image/*" style="padding: 0.5rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>или вставить ссылку</label>
+                    <input type="text" name="image_url{% if i > 1 %}_{{ i }}{% endif %}" placeholder="https://images.unsplash.com/photo-...">
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Тарифы -->
+            <div style="margin: 1.5rem 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3>Тарифы</h3>
+                    <button type="button" onclick="addTariffField()" class="btn-book" style="width: auto; padding: 0.5rem 1.5rem;">+ Добавить тариф</button>
+                </div>
+
+                <div id="tariffs-container">
+                    <div class="tariff-admin-item">
+                        <h4 style="margin-bottom: 0.8rem;">Тариф 1</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Название тарифа *</label>
+                                <input type="text" name="tariff_name[]" required placeholder="Делюкс с видом на море">
+                            </div>
+                            <div class="form-group">
+                                <label>Цена за ночь (₽) *</label>
+                                <input type="number" name="tariff_price[]" min="500" step="100" required placeholder="15000">
+                            </div>
+                            <div class="form-group">
+                                <label>Тип питания</label>
+                                <select name="tariff_meal[]">
+                                    <option value="Без питания">Без питания</option>
+                                    <option value="Завтрак">Завтрак</option>
+                                    <option value="Завтрак и обед">Завтрак и обед</option>
+                                    <option value="Завтрак и ужин">Завтрак и ужин</option>
+                                    <option value="Завтрак, обед и ужин">Завтрак, обед и ужин</option>
+                                    <option value="Всё включено">Всё включено</option>
+                                    <option value="Ультра всё включено">Ультра всё включено</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Макс. гостей</label>
+                                <input type="number" name="tariff_guests[]" min="1" max="10" value="2">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Описание тарифа</label>
+                            <textarea name="tariff_description[]" rows="2" placeholder="Описание номера..."></textarea>
+                        </div>
+
+                        <!-- Фото номера -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.8rem;">📷 Фото номера 1</label>
+                                <input type="file" name="tariff_image_0" accept="image/*" style="padding: 0.3rem;">
+                                <input type="text" name="tariff_image_url_0" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.8rem;">📷 Фото номера 2</label>
+                                <input type="file" name="tariff_image_0_2" accept="image/*" style="padding: 0.3rem;">
+                                <input type="text" name="tariff_image_url_0_2" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.8rem;">📷 Фото номера 3</label>
+                                <input type="file" name="tariff_image_0_3" accept="image/*" style="padding: 0.3rem;">
+                                <input type="text" name="tariff_image_url_0_3" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="this.parentElement.remove()" class="btn-delete-tariff">🗑️ Удалить тариф</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="submit" class="btn-submit" style="width: auto; padding: 0.8rem 3rem;">💾 Сохранить отель</button>
+                <a href="{{ url_for('admin_hotels') }}" class="btn-login" style="padding: 0.8rem 2rem; text-align: center;">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function addTariffField() {
+    var container = document.getElementById('tariffs-container');
+    var index = container.children.length;
+
+    var html = `
+        <div class="tariff-admin-item">
+            <h4 style="margin-bottom: 0.8rem;">Тариф ${index + 1}</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Название тарифа *</label>
+                    <input type="text" name="tariff_name[]" required placeholder="Делюкс с видом на море">
+                </div>
+                <div class="form-group">
+                    <label>Цена за ночь (₽) *</label>
+                    <input type="number" name="tariff_price[]" min="500" step="100" required placeholder="15000">
+                </div>
+                <div class="form-group">
+                    <label>Тип питания</label>
+                    <select name="tariff_meal[]">
+                        <option value="Без питания">Без питания</option>
+                        <option value="Завтрак">Завтрак</option>
+                        <option value="Завтрак и обед">Завтрак и обед</option>
+                        <option value="Завтрак и ужин">Завтрак и ужин</option>
+                        <option value="Завтрак, обед и ужин">Завтрак, обед и ужин</option>
+                        <option value="Всё включено">Всё включено</option>
+                        <option value="Ультра всё включено">Ультра всё включено</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Макс. гостей</label>
+                    <input type="number" name="tariff_guests[]" min="1" max="10" value="2">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Описание тарифа</label>
+                <textarea name="tariff_description[]" rows="2" placeholder="Описание номера..."></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem;">📷 Фото номера 1</label>
+                    <input type="file" name="tariff_image_${index}" accept="image/*" style="padding: 0.3rem;">
+                    <input type="text" name="tariff_image_url_${index}" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem;">📷 Фото номера 2</label>
+                    <input type="file" name="tariff_image_${index}_2" accept="image/*" style="padding: 0.3rem;">
+                    <input type="text" name="tariff_image_url_${index}_2" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.8rem;">📷 Фото номера 3</label>
+                    <input type="file" name="tariff_image_${index}_3" accept="image/*" style="padding: 0.3rem;">
+                    <input type="text" name="tariff_image_url_${index}_3" placeholder="или ссылка" style="margin-top: 0.2rem;">
+                </div>
+            </div>
+
+            <button type="button" onclick="this.parentElement.remove()" class="btn-delete-tariff">🗑️ Удалить тариф</button>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', html);
+}
+</script>
+{% endblock %}

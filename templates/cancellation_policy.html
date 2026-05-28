@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Условия отмены | 2RIST{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{ url_for('index') }}">Главная</a> / Условия отмены
+</div>
+
+<h1 class="section-title">Условия отмены бронирования</h1>
+
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem;">🕐 Бесплатная отмена</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Вы можете бесплатно отменить бронирование <strong>за 48 часов</strong> до даты заезда. Средства возвращаются в полном объёме.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem;">⚠️ Поздняя отмена</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">При отмене менее чем за 48 часов до заезда удерживается стоимость первой ночи проживания.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem;">❌ Незаезд</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">В случае незаезда без предварительной отмены бронирование аннулируется, средства не возвращаются.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem;">💎 Премиум-тарифы</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Для тарифов Люкс, Делюкс и Президентский действуют особые условия отмены — уточняйте при бронировании.</p>
+    </div>
+
+    <div style="background: #D1ECF1; border-radius: 8px; padding: 1.5rem; margin-top: 2rem; box-shadow: var(--shadow);">
+        <h4 style="color: #0C5460; margin-bottom: 0.5rem;">📞 Как отменить бронирование?</h4>
+        <p style="color: #0C5460; line-height: 1.7; font-size: 0.9rem;">Для отмены бронирования свяжитесь с нами по телефону +7 (999) 123-45-67 или напишите на info@2rist.ru. Укажите номер бронирования.</p>
+    </div>
+
+</div>
+{% endblock %}

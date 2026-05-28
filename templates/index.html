@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}2RIST - Интернет-магазин туров{% endblock %}
+{% block content %}
+
+<!-- Популярные направления -->
+<section style="margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 class="section-title" style="margin-bottom: 0;">Популярные направления</h2>
+        <a href="{{ url_for('hotels') }}" style="color: var(--primary-orange); text-decoration: none; font-size: 0.9rem;">Все отели →</a>
+    </div>
+
+    {% if popular_hotels %}
+    <div class="hotel-grid">
+        {% for hotel in popular_hotels %}
+        <a href="{{ url_for('hotel_detail', hotel_id=hotel.id) }}" style="text-decoration: none;">
+            <div class="hotel-card">
+                <div class="hotel-image">
+                    <img src="{{ hotel.image_url or 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800' }}" alt="{{ hotel.name }}">
+                    {% if hotel.is_hit %}
+                    <div class="hotel-badge">🔥 Хит продаж</div>
+                    {% endif %}
+                    <div class="hotel-rating-badge">★ {{ "%.1f"|format(hotel.rating) }}</div>
+                </div>
+                <div class="hotel-info">
+                    <h3 class="hotel-name">{{ hotel.name }}</h3>
+                    <p class="hotel-location"><i class="fas fa-map-marker-alt"></i> {{ hotel.city }}, {{ hotel.country }}</p>
+                    <div class="hotel-stars">{% for i in range(hotel.stars) %}★{% endfor %}</div>
+                    {% if hotel.booking_count and hotel.booking_count > 0 %}
+                    <div style="font-size: 0.8rem; color: var(--success); margin-bottom: 0.5rem;">
+                        📊 {{ hotel.booking_count }} бронирований
+                    </div>
+                    {% endif %}
+                    <div class="hotel-price-block">
+                        <div class="hotel-price">от {{ "%.0f"|format(hotel.min_price)|int }} ₽ <small>/ ночь</small></div>
+                        <span class="btn-book">Выбрать</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 4rem; background: white; border-radius: 12px;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🏨</div>
+        <h3>Пока нет популярных направлений</h3>
+        <p style="color: var(--text-gray);">Начните бронировать отели, и они появятся здесь</p>
+        <a href="{{ url_for('hotels') }}" class="btn-book" style="display: inline-block; margin-top: 1rem; width: auto; padding: 0.7rem 2rem;">Смотреть все отели</a>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Почему выбирают 2RIST -->
+<section style="margin-bottom: 2rem;">
+    <h2 class="section-title">Почему выбирают 2RIST</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem;">
+        <div class="feature-card-why">
+            <div class="feature-icon-why">🏨</div>
+            <h3>250 000+ отелей</h3>
+            <p>Огромный выбор по всему миру — от уютных апартаментов до роскошных курортов</p>
+        </div>
+        <div class="feature-card-why">
+            <div class="feature-icon-why">💰</div>
+            <h3>Лучшие цены</h3>
+            <p>Прямые контракты с отелями позволяют предлагать выгодные тарифы без наценок</p>
+        </div>
+        <div class="feature-card-why">
+            <div class="feature-icon-why">🛡️</div>
+            <h3>Безопасная оплата</h3>
+            <p>Шифрование данных и защита платежей по международным стандартам безопасности</p>
+        </div>
+        <div class="feature-card-why">
+            <div class="feature-icon-why">📞</div>
+            <h3>Поддержка 24/7</h3>
+            <p>Наша команда всегда на связи и готова помочь с любым вопросом в любое время</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

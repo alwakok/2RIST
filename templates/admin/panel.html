@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Админ-панель | 2RIST{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <div class="admin-sidebar">
+        <h3 style="margin-bottom: 1rem; color: var(--primary-orange);">Админ-панель</h3>
+        <ul class="admin-menu">
+            <li><a href="{{ url_for('admin_panel') }}" class="active">📊 Дашборд</a></li>
+            <li><a href="{{ url_for('admin_hotels') }}">🏨 Отели</a></li>
+            <li><a href="{{ url_for('admin_bookings') }}">📋 Бронирования</a></li>
+            <li><a href="{{ url_for('index') }}">🏠 На сайт</a></li>
+        </ul>
+    </div>
+
+    <div class="admin-content">
+        <h2 style="margin-bottom: 1.5rem;">Панель управления</h2>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ hotels_count }}</div>
+                <div class="stat-label">🏨 Отелей</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, var(--primary-orange), #e55a2b);">
+                <div class="stat-number">{{ bookings_count }}</div>
+                <div class="stat-label">📋 Бронирований</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f0c929, #e0b800); color: var(--text-dark);">
+                <div class="stat-number">{{ users_count }}</div>
+                <div class="stat-label">👤 Пользователей</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <div class="stat-number">{{ reviews_count }}</div>
+                <div class="stat-label">⭐ Отзывов</div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 1rem;">Последние бронирования</h3>
+        {% if recent_bookings %}
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Пользователь</th>
+                        <th>Отель</th>
+                        <th>Даты</th>
+                        <th>Сумма</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in recent_bookings %}
+                    <tr>
+                        <td>#{{ booking.id }}</td>
+                        <td>{{ booking.user.username }}</td>
+                        <td>{{ booking.hotel.name }}</td>
+                        <td>{{ booking.check_in.strftime('%d.%m') }} - {{ booking.check_out.strftime('%d.%m.%Y') }}</td>
+                        <td>{{ "%.0f"|format(booking.total_price)|int }} ₽</td>
+                        <td>
+                            <span class="booking-status-badge status-{{ booking.status }}">
+                                {% if booking.status == 'pending' %}Ожидает
+                                {% elif booking.status == 'confirmed' %}Подтверждено
+                                {% elif booking.status == 'paid' %}Оплачено
+                                {% elif booking.status == 'cancelled' %}Отменено
+                                {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: var(--text-gray); padding: 2rem;">Нет бронирований</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

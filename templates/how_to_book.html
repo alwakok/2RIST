@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Как забронировать | 2RIST{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{ url_for('index') }}">Главная</a> / Как забронировать
+</div>
+
+<h1 class="section-title">Как забронировать отель</h1>
+
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <div style="background: white; border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <div style="background: var(--primary-orange); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">1</div>
+            <h3 style="font-size: 1.1rem;">Найдите подходящий отель</h3>
+        </div>
+        <p style="color: var(--text-gray); line-height: 1.7; padding-left: 3.5rem;">Используйте форму поиска на сайте. Укажите страну, город, даты поездки и желаемое количество звёзд. Просмотрите результаты и выберите отель.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <div style="background: var(--primary-orange); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">2</div>
+            <h3 style="font-size: 1.1rem;">Выберите тариф</h3>
+        </div>
+        <p style="color: var(--text-gray); line-height: 1.7; padding-left: 3.5rem;">На странице отеля доступны разные тарифы: Эконом, Стандарт, Люкс, Делюкс. Выберите подходящий по цене и условиям.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <div style="background: var(--primary-orange); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">3</div>
+            <h3 style="font-size: 1.1rem;">Укажите детали поездки</h3>
+        </div>
+        <p style="color: var(--text-gray); line-height: 1.7; padding-left: 3.5rem;">Выберите даты заезда и выезда, укажите количество гостей. Система автоматически рассчитает стоимость.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <div style="background: var(--primary-orange); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">4</div>
+            <h3 style="font-size: 1.1rem;">Подтвердите бронирование</h3>
+        </div>
+        <p style="color: var(--text-gray); line-height: 1.7; padding-left: 3.5rem;">Нажмите кнопку «Подтвердить бронирование». Бронь будет создана и появится в вашем личном кабинете.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 2rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+            <div style="background: var(--primary-orange); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">5</div>
+            <h3 style="font-size: 1.1rem;">Оплатите бронирование</h3>
+        </div>
+        <p style="color: var(--text-gray); line-height: 1.7; padding-left: 3.5rem;">Свяжитесь с администратором для оплаты любым удобным способом. После оплаты бронирование будет подтверждено.</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('hotels') }}" class="btn-submit-booking" style="display: inline-block; width: auto; padding: 1rem 3rem; text-decoration: none;">
+            Найти отель и забронировать
+        </a>
+    </div>
+
+</div>
+{% endblock %}

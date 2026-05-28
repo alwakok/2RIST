@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Политика конфиденциальности | 2RIST{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{ url_for('index') }}">Главная</a> / Политика конфиденциальности
+</div>
+
+<h1 class="section-title">Политика конфиденциальности</h1>
+
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <div style="background: white; border-radius: 8px; padding: 2rem; box-shadow: var(--shadow);">
+        
+        <p style="color: var(--text-gray); line-height: 1.7; margin-bottom: 1.5rem;">
+            Настоящая Политика конфиденциальности действует в отношении всей информации, которую ООО «2РИСТ» может получить о Пользователе во время использования сайта 2rist.ru.
+        </p>
+
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.8rem;">1. Какие данные мы собираем</h3>
+        <ul style="color: var(--text-gray); line-height: 1.8; padding-left: 1.5rem; margin-bottom: 1.5rem;">
+            <li>Имя и фамилия</li>
+            <li>Адрес электронной почты</li>
+            <li>Номер телефона</li>
+            <li>Данные о бронированиях</li>
+        </ul>
+
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.8rem;">2. Как мы используем данные</h3>
+        <ul style="color: var(--text-gray); line-height: 1.8; padding-left: 1.5rem; margin-bottom: 1.5rem;">
+            <li>Для обработки бронирований</li>
+            <li>Для связи с вами по вопросам бронирования</li>
+            <li>Для улучшения качества обслуживания</li>
+            <li>Для отправки информации об акциях (с вашего согласия)</li>
+        </ul>
+
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.8rem;">3. Защита данных</h3>
+        <p style="color: var(--text-gray); line-height: 1.7; margin-bottom: 1.5rem;">
+            Мы принимаем необходимые организационные и технические меры для защиты персональной информации Пользователя от неправомерного доступа, изменения, раскрытия или уничтожения.
+        </p>
+
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.8rem;">4. Передача данных третьим лицам</h3>
+        <p style="color: var(--text-gray); line-height: 1.7; margin-bottom: 1.5rem;">
+            Мы не передаем ваши персональные данные третьим лицам, за исключением случаев, предусмотренных законодательством РФ.
+        </p>
+
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.8rem;">5. Контакты</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">
+            По всем вопросам, связанным с обработкой персональных данных, обращайтесь:<br>
+            📧 info@2rist.ru<br>
+            📞 +7 (999) 123-45-67<br>
+            🏢 Москва, ул. Тверская, 1
+        </p>
+
+    </div>
+
+</div>
+{% endblock %}

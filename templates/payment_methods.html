@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Способы оплаты | 2RIST{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{ url_for('index') }}">Главная</a> / Способы оплаты
+</div>
+
+<h1 class="section-title">Способы оплаты</h1>
+
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem;">💳 Банковская карта</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Принимаем карты Visa, MasterCard, МИР. Оплата производится через защищённое соединение. Комиссия не взимается.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem;">💵 Наличные</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Вы можете оплатить бронирование наличными в нашем офисе по адресу: Москва, ул. Тверская, 1. Режим работы: ежедневно с 9:00 до 21:00.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem;">🏦 Банковский перевод</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Оплата по реквизитам. После создания бронирования свяжитесь с администратором для получения счёта. Зачисление средств — 1-3 рабочих дня.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem;">📱 Электронные кошельки</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Принимаем платежи через ЮMoney, QIWI. Моментальное зачисление. Уточните детали у администратора.</p>
+    </div>
+
+    <div style="background: #FFF3CD; border-radius: 8px; padding: 1.5rem; margin-top: 2rem; box-shadow: var(--shadow);">
+        <h4 style="color: #856404; margin-bottom: 0.5rem;">⚠️ Важно</h4>
+        <p style="color: #856404; line-height: 1.7; font-size: 0.9rem;">Оплата производится только после создания бронирования. Для оплаты обратитесь к администратору через личный кабинет или по контактам в подвале сайта.</p>
+    </div>
+
+</div>
+{% endblock %}

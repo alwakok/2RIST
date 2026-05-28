@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% block title %}{{ hotel.name }} | 2RIST{% endblock %}
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{ url_for('index') }}">Главная</a> /
+    <a href="{{ url_for('hotels') }}">Отели</a> /
+    {{ hotel.name }}
+</div>
+
+<div class="hotel-main-card">
+    <div class="hotel-main-gallery">
+        {% set images = hotel.all_images %}
+        <div class="main-gallery-large" id="main-gallery">
+            <div class="main-gallery-track">
+                {% if images %}
+                {% for img in images %}
+                <div class="main-gallery-slide">
+                    <img src="{{ img }}" alt="{{ hotel.name }}">
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="main-gallery-slide">
+                    <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800" alt="{{ hotel.name }}">
+                </div>
+                {% endif %}
+            </div>
+            {% if images|length > 1 %}
+            <button class="main-gallery-prev" onclick="changeMainSlide(-1)">‹</button>
+            <button class="main-gallery-next" onclick="changeMainSlide(1)">›</button>
+            <div class="main-gallery-dots">
+                {% for img in images %}
+                <span class="main-gallery-dot {% if loop.first %}active{% endif %}" onclick="goToMainSlide({{ loop.index0 }})"></span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hotel-main-info">
+        <div class="hotel-main-header">
+            <h1 class="hotel-main-name">{{ hotel.name }}</h1>
+            <div class="hotel-main-stars">{% for i in range(hotel.stars) %}★{% endfor %}</div>
+        </div>
+        <p class="hotel-main-location"><i class="fas fa-map-marker-alt"></i> {{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }}</p>
+        <div class="hotel-main-rating-row">
+            <span class="hotel-main-rating-badge">★ {{ "%.1f"|format(hotel.rating) }} / 5</span>
+            <span class="hotel-main-reviews-count">{{ reviews|length }} отзывов</span>
+        </div>
+        <div class="hotel-main-features">
+            <div class="hotel-main-feature"><i class="fas fa-wifi"></i> Wi-Fi</div>
+            {% for tariff in hotel.tariffs[:1] %}
+            <div class="hotel-main-feature"><i class="fas fa-utensils"></i> {{ tariff.meal_type }}</div>
+            {% endfor %}
+            <div class="hotel-main-feature"><i class="fas fa-swimming-pool"></i> Бассейн</div>
+            <div class="hotel-main-feature"><i class="fas fa-parking"></i> Парковка</div>
+        </div>
+    </div>
+</div>
+
+<div class="booking-block">
+    <h2 class="booking-block-title">Выберите номер</h2>
+    <div class="tariffs-list">
+        {% for tariff in hotel.tariffs %}
+        <div class="tariff-item-card">
+            <div class="tariff-item-gallery">
+                {% set t_images = tariff.all_images %}
+                <div class="tariff-gallery-main" id="tariff-gallery-{{ tariff.id }}">
+                    <div class="tariff-gallery-track">
+                        {% if t_images %}
+                        {% for img in t_images %}
+                        <div class="tariff-gallery-slide">
+                            <img src="{{ img }}" alt="{{ tariff.name }}">
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="tariff-gallery-slide">
+                            <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400" alt="{{ tariff.name }}">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if t_images|length > 1 %}
+                    <button class="tariff-gallery-prev" onclick="event.stopPropagation(); changeTariffSlide({{ tariff.id }}, -1)">‹</button>
+                    <button class="tariff-gallery-next" onclick="event.stopPropagation(); changeTariffSlide({{ tariff.id }}, 1)">›</button>
+                    <div class="tariff-gallery-dots">
+                        {% for img in t_images %}
+                        <span class="tariff-gallery-dot {% if loop.first %}active{% endif %}" onclick="event.stopPropagation(); goToTariffSlide({{ tariff.id }}, {{ loop.index0 }})"></span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="tariff-item-info">
+                <div class="tariff-item-header">
+                    <h3 class="tariff-item-name">{{ tariff.name }}</h3>
+                    {% if tariff.meal_type != 'Без питания' %}
+                    <span class="tariff-item-meal">{{ tariff.meal_type }}</span>
+                    {% endif %}
+                </div>
+                <div class="tariff-item-details">
+                    <div class="tariff-item-detail">👤 до {{ tariff.max_guests }} гостей</div>
+                    <div class="tariff-item-detail">📶 {{ 'Wi-Fi' if tariff.wifi_included else 'Без Wi-Fi' }}</div>
+                    {% if tariff.description %}
+                    <div class="tariff-item-detail tariff-item-desc">{{ tariff.description }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="tariff-item-price">
+                <div class="tariff-item-price-value">{{ "%.0f"|format(tariff.price_per_night) }} ₽</div>
+                <div class="tariff-item-price-label">за 1 чел / ночь</div>
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('booking', hotel_id=hotel.id, tariff_id=tariff.id) }}" class="btn-book tariff-item-btn">Забронировать</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn-book tariff-item-btn">Войти</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Остальные блоки (описание, отзывы) без изменений -->
+{% if hotel.description %}
+<div class="info-block">
+    <h2 class="info-block-title">Об отеле</h2>
+    <p class="info-block-text">{{ hotel.description }}</p>
+    <div class="info-block-details">
+        <div class="info-detail-item"><strong>Адрес:</strong> {{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }}</div>
+        <div class="info-detail-item"><strong>Звёзды:</strong> {% for i in range(hotel.stars) %}★{% endfor %}</div>
+        <div class="info-detail-item"><strong>Рейтинг:</strong> {{ "%.1f"|format(hotel.rating) }} / 5</div>
+    </div>
+</div>
+{% endif %}
+
+<div class="reviews-block">
+    <div class="reviews-block-header">
+        <h2 class="reviews-block-title">Отзывы ({{ reviews|length }})</h2>
+        {% if session.get('user_id') %}
+        <button onclick="showReviewForm()" class="btn-book" style="width: auto; padding: 0.6rem 1.5rem;">✎ Написать отзыв</button>
+        {% endif %}
+    </div>
+    <div id="review-form" style="display: none; background: #F7F9FC; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+        <form method="POST" action="{{ url_for('add_review', hotel_id=hotel.id) }}">
+            <div class="form-group">
+                <label>Оценка</label>
+                <div style="display: flex; gap: 0.5rem; font-size: 1.5rem;" id="star-rating-container">
+                    {% for i in range(1, 6) %}
+                    <label style="cursor: pointer;"><input type="radio" name="rating" value="{{ i }}" required style="display: none;"><span class="star-rating" data-value="{{ i }}">☆</span></label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="form-group"><label>Заголовок</label><input type="text" name="title" placeholder="Кратко опишите впечатления"></div>
+            <div class="form-group"><label>Отзыв</label><textarea name="text" rows="3" placeholder="Подробнее..."></textarea></div>
+            <div class="form-group"><label>Плюсы</label><input type="text" name="pros" placeholder="Что понравилось?"></div>
+            <div class="form-group"><label>Минусы</label><input type="text" name="cons" placeholder="Что улучшить?"></div>
+            <button type="submit" class="btn-submit">Отправить отзыв</button>
+            <button type="button" onclick="hideReviewForm()" class="btn-login" style="margin-top: 0.5rem; display: block; text-align: center; width: 100%;">Отмена</button>
+        </form>
+    </div>
+
+    {% if reviews %}
+    <div class="reviews-list">
+        {% for review in reviews %}
+        <div class="review-card">
+            <div class="review-card-header">
+                <div>
+                    <strong>{{ review.user.full_name or review.user.username }}</strong>
+                    <span class="review-stars">{% for i in range(review.rating) %}★{% endfor %}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                    <small style="color: var(--text-light);">{{ review.created_at.strftime('%d.%m.%Y') }}</small>
+                    {% if session.get('role') == 'admin' %}
+                    <button onclick="deleteReview({{ review.id }})" class="review-delete-btn" title="Удалить"><i class="fas fa-trash-alt"></i></button>
+                    {% endif %}
+                </div>
+            </div>
+            {% if review.title %}<h4 style="margin-bottom: 0.3rem;">{{ review.title }}</h4>{% endif %}
+            {% if review.text %}<p style="color: var(--text-gray); margin-bottom: 0.5rem;">{{ review.text }}</p>{% endif %}
+            {% if review.pros %}<p class="review-pros">👍 {{ review.pros }}</p>{% endif %}
+            {% if review.cons %}<p class="review-cons">👎 {{ review.cons }}</p>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align: center; color: var(--text-gray); padding: 2rem;">Пока нет отзывов. Будьте первым!</p>
+    {% endif %}
+</div>
+
+<div id="deleteModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; text-align: center;">
+        <h3>Удалить отзыв?</h3>
+        <div style="display: flex; gap: 0.8rem; justify-content: center; margin-top: 1.5rem;">
+            <button onclick="closeDeleteModal()" class="btn-login">Отмена</button>
+            <form id="deleteForm" method="POST"><button type="submit" class="btn-submit" style="width: auto; padding: 0.7rem 2rem;">Удалить</button></form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Главная галерея отеля (transform)
+var mainTrack = document.querySelector('#main-gallery .main-gallery-track');
+var mainDots = document.querySelectorAll('#main-gallery .main-gallery-dot');
+var mainCurrent = 0;
+var mainSlidesCount = mainTrack ? mainTrack.children.length : 0;
+
+function showMainSlide(index) {
+    if (!mainTrack) return;
+    mainTrack.style.transform = 'translateX(-' + (index * 100) + '%)';
+    mainDots.forEach(function(d, i) { d.classList.toggle('active', i === index); });
+    mainCurrent = index;
+}
+
+window.changeMainSlide = function(dir) {
+    var newIdx = (mainCurrent + dir + mainSlidesCount) % mainSlidesCount;
+    showMainSlide(newIdx);
+};
+
+window.goToMainSlide = function(idx) { showMainSlide(idx); };
+
+// Галерея тарифа (transform)
+window.changeTariffSlide = function(tariffId, direction) {
+    var gallery = document.getElementById('tariff-gallery-' + tariffId);
+    var track = gallery.querySelector('.tariff-gallery-track');
+    var slides = track.children.length;
+    var current = parseInt(gallery.getAttribute('data-current')) || 0;
+    current = (current + direction + slides) % slides;
+    gallery.setAttribute('data-current', current);
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    updateTariffDots(gallery, current);
+};
+
+window.goToTariffSlide = function(tariffId, index) {
+    var gallery = document.getElementById('tariff-gallery-' + tariffId);
+    var track = gallery.querySelector('.tariff-gallery-track');
+    gallery.setAttribute('data-current', index);
+    track.style.transform = 'translateX(-' + (index * 100) + '%)';
+    updateTariffDots(gallery, index);
+};
+
+function updateTariffDots(gallery, index) {
+    var dots = gallery.querySelectorAll('.tariff-gallery-dot');
+    dots.forEach(function(d, i) { d.classList.toggle('active', i === index); });
+}
+
+// Отзывы
+function showReviewForm() { document.getElementById('review-form').style.display = 'block'; document.getElementById('review-form').scrollIntoView({behavior:'smooth'}); }
+function hideReviewForm() { document.getElementById('review-form').style.display = 'none'; }
+document.querySelectorAll('.star-rating').forEach(function(star) {
+    star.addEventListener('click', function() {
+        var v = this.dataset.value;
+        document.querySelectorAll('.star-rating').forEach(function(s) {
+            s.textContent = s.dataset.value <= v ? '★' : '☆';
+            s.style.color = s.dataset.value <= v ? '#FFB800' : '#ccc';
+        });
+        this.parentElement.querySelector('input').checked = true;
+    });
+});
+function deleteReview(id) {
+    document.getElementById('deleteForm').action = '/admin/review/delete/' + id;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+function closeDeleteModal() { document.getElementById('deleteModal').style.display = 'none'; }
+document.getElementById('deleteModal').addEventListener('click', function(e) { if (e.target === this) closeDeleteModal(); });
+</script>
+{% endblock %}

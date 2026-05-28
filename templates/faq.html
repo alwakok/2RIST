@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ — Часто задаваемые вопросы | 2RIST{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{ url_for('index') }}">Главная</a> / FAQ
+</div>
+
+<h1 class="section-title">Часто задаваемые вопросы</h1>
+
+<div style="max-width: 800px; margin: 0 auto;">
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem; font-size: 1.1rem;">❓ Как найти подходящий отель?</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Используйте поиск в верхней части сайта. Укажите страну, город или название отеля, даты поездки и количество звезд. Система покажет все подходящие варианты. Вы можете отсортировать результаты по цене, рейтингу или популярности.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem; font-size: 1.1rem;">❓ Как забронировать номер?</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Выберите отель, затем тариф (Эконом, Стандарт, Люкс и т.д.), укажите даты заезда и выезда, количество гостей и нажмите «Подтвердить бронирование». Подробнее читайте в разделе <a href="{{ url_for('how_to_book') }}" style="color: var(--primary-orange);">«Как забронировать»</a>.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem; font-size: 1.1rem;">❓ Какие тарифы доступны?</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">В каждом отеле доступно несколько тарифов:</p>
+        <ul style="color: var(--text-gray); line-height: 1.7; padding-left: 1.5rem;">
+            <li><strong>Эконом</strong> — бюджетный вариант</li>
+            <li><strong>Стандарт</strong> — оптимальное соотношение цены и качества</li>
+            <li><strong>Люкс</strong> — повышенный комфорт</li>
+            <li><strong>Делюкс</strong> — премиум-уровень</li>
+            <li><strong>Президентский</strong> — максимальный уровень комфорта</li>
+        </ul>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem; font-size: 1.1rem;">❓ Как оплатить бронирование?</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">После создания бронирования обратитесь к администратору для оплаты. Доступные способы: банковская карта, наличные, банковский перевод. Подробнее — в разделе <a href="{{ url_for('payment_methods') }}" style="color: var(--primary-orange);">«Способы оплаты»</a>.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem; font-size: 1.1rem;">❓ Можно ли отменить бронирование?</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Да, вы можете отменить бронирование. Условия отмены зависят от выбранного тарифа. Как правило, действует правило бесплатной отмены за 48 часов до заезда. Подробнее — в разделе <a href="{{ url_for('cancellation_policy') }}" style="color: var(--primary-orange);">«Условия отмены»</a>.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem; font-size: 1.1rem;">❓ Как связаться с поддержкой?</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Вы можете связаться с нами:</p>
+        <ul style="color: var(--text-gray); line-height: 1.7; padding-left: 1.5rem;">
+            <li>📞 По телефону: +7 (999) 123-45-67</li>
+            <li>📧 По email: info@2rist.ru</li>
+            <li>🏢 В офисе: Москва, ул. Тверская, 1</li>
+        </ul>
+        <p style="color: var(--text-gray); line-height: 1.7; margin-top: 0.5rem;">Поддержка работает круглосуточно, без выходных.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem; font-size: 1.1rem;">❓ Нужно ли регистрироваться для бронирования?</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Да, для бронирования необходимо <a href="{{ url_for('register') }}" style="color: var(--primary-orange);">зарегистрироваться</a> на сайте. Это займет меньше минуты и позволит отслеживать все ваши бронирования в личном кабинете.</p>
+    </div>
+
+    <div style="background: white; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow);">
+        <h3 style="color: var(--primary-orange); margin-bottom: 0.5rem; font-size: 1.1rem;">❓ Безопасны ли мои данные?</h3>
+        <p style="color: var(--text-gray); line-height: 1.7;">Да, мы используем современные методы шифрования для защиты ваших персональных данных. Ознакомьтесь с <a href="{{ url_for('privacy_policy') }}" style="color: var(--primary-orange);">политикой конфиденциальности</a>.</p>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem; padding: 2rem; background: linear-gradient(135deg, var(--primary-orange), #e55a2b); border-radius: 8px; color: white;">
+        <h3 style="margin-bottom: 0.5rem;">Не нашли ответ на свой вопрос?</h3>
+        <p style="margin-bottom: 1rem;">Свяжитесь с нами, и мы обязательно поможем!</p>
+        <p style="font-size: 1.3rem; font-weight: 600;">📞 +7 (999) 123-45-67</p>
+        <p>📧 info@2rist.ru</p>
+    </div>
+
+</div>
+{% endblock %}

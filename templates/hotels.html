@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Поиск отелей | 2RIST{% endblock %}
+{% block content %}
+<div class="hotels-layout">
+    <aside class="sidebar-filters">
+        <form method="GET" action="{{ url_for('hotels') }}" id="filter-form">
+            <div class="filter-header">
+                <h3>Фильтры</h3>
+                <a href="{{ url_for('hotels') }}" class="filter-reset-link">Сбросить</a>
+            </div>
+            <div class="filter-block">
+                <h4>Количество звёзд</h4>
+                {% set selected_stars = request.args.getlist('stars') %}
+                {% for star in [5,4,3] %}
+                <label class="filter-checkbox">
+                    <input type="checkbox" name="stars" value="{{ star }}" {% if star|string in selected_stars %}checked{% endif %}>
+                    <span>{% for i in range(star) %}★{% endfor %} <small>{{ star }} звезды</small></span>
+                </label>
+                {% endfor %}
+            </div>
+            <div class="filter-block">
+                <h4>Рейтинг отеля</h4>
+                {% set selected_rating = request.args.get('rating_min', '') %}
+                {% for rating_val in [4.5, 4.0, 3.5] %}
+                <label class="filter-checkbox">
+                    <input type="radio" name="rating_min" value="{{ rating_val }}" {% if selected_rating == rating_val|string %}checked{% endif %}>
+                    <span>★ от {{ rating_val }}</span>
+                </label>
+                {% endfor %}
+                <label class="filter-checkbox"><input type="radio" name="rating_min" value="" {% if not selected_rating %}checked{% endif %}><span>Любой</span></label>
+            </div>
+            <div class="filter-block">
+                <h4>Тип питания</h4>
+                {% set selected_meal = request.args.get('meal_type', '') %}
+                <label class="filter-checkbox"><input type="radio" name="meal_type" value="" {% if not selected_meal %}checked{% endif %}><span>Любое</span></label>
+                <label class="filter-checkbox"><input type="radio" name="meal_type" value="breakfast" {% if selected_meal == 'breakfast' %}checked{% endif %}><span>🍳 Завтрак</span></label>
+                <label class="filter-checkbox"><input type="radio" name="meal_type" value="half_board" {% if selected_meal == 'half_board' %}checked{% endif %}><span>🍽️ Завтрак и ужин</span></label>
+                <label class="filter-checkbox"><input type="radio" name="meal_type" value="full_board" {% if selected_meal == 'full_board' %}checked{% endif %}><span>🍽️ Завтрак, обед и ужин</span></label>
+                <label class="filter-checkbox"><input type="radio" name="meal_type" value="all_inclusive" {% if selected_meal == 'all_inclusive' %}checked{% endif %}><span>🥂 Всё включено</span></label>
+                <label class="filter-checkbox"><input type="radio" name="meal_type" value="ultra_all_inclusive" {% if selected_meal == 'ultra_all_inclusive' %}checked{% endif %}><span>🥂 Ультра всё включено</span></label>
+            </div>
+            <div class="filter-block">
+                <h4>Цена за ночь (₽)</h4>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" name="min_price" placeholder="От" value="{{ request.args.get('min_price', '') }}" class="filter-input" style="width: 50%;">
+                    <input type="number" name="max_price" placeholder="До" value="{{ request.args.get('max_price', '') }}" class="filter-input" style="width: 50%;">
+                </div>
+            </div>
+            <button type="submit" class="btn-filter-apply">Применить фильтры</button>
+        </form>
+    </aside>
+
+    <div class="hotels-main">
+        <div class="sort-bar">
+            <span style="font-size: 0.9rem; color: var(--text-gray);">Найдено: {{ hotels|length }} отелей</span>
+            <select onchange="addSortParam(this.value)" class="sort-select">
+                <option value="popular" {% if request.args.get('sort', 'popular') == 'popular' %}selected{% endif %}>По популярности</option>
+                <option value="price_asc" {% if request.args.get('sort') == 'price_asc' %}selected{% endif %}>Сначала дешёвые</option>
+                <option value="price_desc" {% if request.args.get('sort') == 'price_desc' %}selected{% endif %}>Сначала дорогие</option>
+                <option value="rating" {% if request.args.get('sort') == 'rating' %}selected{% endif %}>По рейтингу</option>
+            </select>
+        </div>
+
+        {% if hotels %}
+        <div class="hotels-table-list">
+            {% for hotel in hotels %}
+            <div class="hotel-table-card" onclick="window.location.href='{{ url_for('hotel_detail', hotel_id=hotel.id) }}'">
+                <div class="hotel-table-photo">
+                    {% set images = hotel.all_images %}
+                    <div class="card-gallery" data-images="{{ images|join('|') }}">
+                        <div class="card-gallery-track">
+                            {% if images %}
+                            {% for img in images %}
+                            <div class="card-gallery-slide">
+                                <img src="{{ img }}" alt="{{ hotel.name }}">
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="card-gallery-slide">
+                                <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400" alt="{{ hotel.name }}">
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% if images|length > 1 %}
+                        <button class="card-gallery-prev" onclick="event.stopPropagation(); prevCardImage(this)">‹</button>
+                        <button class="card-gallery-next" onclick="event.stopPropagation(); nextCardImage(this)">›</button>
+                        <div class="card-gallery-dots">
+                            {% for img in images %}
+                            <span class="card-gallery-dot {% if loop.first %}active{% endif %}"></span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="hotel-table-rating">★ {{ "%.1f"|format(hotel.rating) }}</div>
+                </div>
+                <div class="hotel-table-info">
+                    <div class="hotel-table-header">
+                        <h3 class="hotel-table-name">{{ hotel.name }}</h3>
+                        <div class="hotel-table-stars">{% for i in range(hotel.stars) %}★{% endfor %}</div>
+                    </div>
+                    <p class="hotel-table-location"><i class="fas fa-map-marker-alt"></i> {{ hotel.city }}, {{ hotel.country }}</p>
+                    <div class="hotel-table-features">
+                        <span><i class="fas fa-wifi"></i> Wi-Fi</span>
+                        {% for tariff in hotel.tariffs[:1] %}
+                        <span><i class="fas fa-utensils"></i> {{ tariff.meal_type }}</span>
+                        <span><i class="fas fa-user"></i> до {{ tariff.max_guests }} чел.</span>
+                        {% endfor %}
+                    </div>
+                    <div class="hotel-table-description">
+                        {{ hotel.description[:120] if hotel.description else 'Отличный отель с высоким уровнем сервиса.' }}{% if hotel.description and hotel.description|length > 120 %}...{% endif %}
+                    </div>
+                </div>
+                <div class="hotel-table-price">
+                    <div class="hotel-table-price-value">от {{ "%.0f"|format(hotel.min_price)|int }} ₽</div>
+                    <div class="hotel-table-price-night">за ночь</div>
+                    <button class="btn-book btn-book-table" onclick="event.stopPropagation(); window.location.href='{{ url_for('hotel_detail', hotel_id=hotel.id) }}'">Выбрать номер</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 4rem; background: white; border-radius: 8px;">
+            <h3>Отели не найдены</h3>
+            <p style="color: var(--text-gray);">Попробуйте изменить параметры поиска</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<script>
+function addSortParam(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', value);
+    window.location.href = url.toString();
+}
+
+// Галерея в карточках (transform)
+function getCardImages(gallery) {
+    if (gallery._images) return gallery._images;
+    var data = gallery.getAttribute('data-images');
+    if (!data) return [];
+    var images = data.split('|');
+    gallery._images = images;
+    gallery.setAttribute('data-current', '0');
+    return images;
+}
+
+function prevCardImage(btn) {
+    var gallery = btn.closest('.card-gallery');
+    var track = gallery.querySelector('.card-gallery-track');
+    var images = getCardImages(gallery);
+    if (!images.length) return;
+    var current = parseInt(gallery.getAttribute('data-current')) || 0;
+    current = (current - 1 + images.length) % images.length;
+    gallery.setAttribute('data-current', current);
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    updateCardDots(gallery, current);
+}
+
+function nextCardImage(btn) {
+    var gallery = btn.closest('.card-gallery');
+    var track = gallery.querySelector('.card-gallery-track');
+    var images = getCardImages(gallery);
+    if (!images.length) return;
+    var current = parseInt(gallery.getAttribute('data-current')) || 0;
+    current = (current + 1) % images.length;
+    gallery.setAttribute('data-current', current);
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+    updateCardDots(gallery, current);
+}
+
+function updateCardDots(gallery, index) {
+    var dots = gallery.querySelectorAll('.card-gallery-dot');
+    dots.forEach(function(dot, i) { dot.classList.toggle('active', i === index); });
+}
+</script>
+{% endblock %}

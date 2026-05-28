@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Бронирование | {{ hotel.name }} | 2RIST{% endblock %}
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{ url_for('index') }}">Главная</a> /
+    <a href="{{ url_for('hotels') }}">Отели</a> /
+    <a href="{{ url_for('hotel_detail', hotel_id=hotel.id) }}">{{ hotel.name }}</a> /
+    Бронирование
+</div>
+
+<div class="booking-page">
+    <div class="booking-form-section">
+        <h2 style="margin-bottom: 1.5rem;">Бронирование: {{ hotel.name }}</h2>
+
+        <!-- Выбранный тариф (передан из маршрута) -->
+        <div class="selected-tariff-card" style="background: white; border: 2px solid var(--primary-orange); border-radius: 16px; overflow: hidden; margin-bottom: 1.5rem;">
+            <!-- Галерея тарифа -->
+            {% set t_images = tariff.all_images %}
+            <div class="booking-tariff-gallery" style="position: relative; height: 250px; overflow: hidden;">
+                <div class="booking-tariff-track" style="display: flex; height: 100%; transition: transform 0.4s ease;">
+                    {% if t_images %}
+                    {% for img in t_images %}
+                    <div class="booking-tariff-slide" style="min-width: 100%; height: 100%;">
+                        <img src="{{ img }}" alt="{{ tariff.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="booking-tariff-slide" style="min-width: 100%; height: 100%;">
+                        <img src="https://images.unsplash.com/photo-1590490360182-c33d57733427?w=600" alt="{{ tariff.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    {% endif %}
+                </div>
+                {% if t_images|length > 1 %}
+                <button class="booking-tariff-prev" onclick="prevBookingTariff()" style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; z-index: 2;">‹</button>
+                <button class="booking-tariff-next" onclick="nextBookingTariff()" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 1.3rem; cursor: pointer; z-index: 2;">›</button>
+                <div class="booking-tariff-dots" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 2;">
+                    {% for img in t_images %}
+                    <span class="booking-tariff-dot {% if loop.first %}active{% endif %}" style="width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s;" onclick="goToBookingTariff({{ loop.index0 }})"></span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Информация о тарифе -->
+            <div style="padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h3 style="color: var(--primary-orange); font-size: 1.2rem;">{{ tariff.name }}</h3>
+                    <span style="background: var(--primary-yellow); padding: 4px 12px; border-radius: 15px; font-size: 0.85rem; font-weight: 600;">{{ tariff.meal_type }}</span>
+                </div>
+                <p style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 0.3rem;">👤 до {{ tariff.max_guests }} гостей · 📶 {{ 'Wi-Fi' if tariff.wifi_included else 'Без Wi-Fi' }}</p>
+                {% if tariff.description %}
+                <p style="color: var(--text-light); font-size: 0.85rem;">{{ tariff.description }}</p>
+                {% endif %}
+                <div style="text-align: right; font-size: 1.4rem; font-weight: 700; color: var(--text-dark); margin-top: 0.8rem;">
+                    {{ "%.0f"|format(tariff.price_per_night) }} ₽ <small style="font-size: 0.8rem; color: var(--text-light);">/чел/ночь</small>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST">
+            <input type="hidden" name="tariff_id" value="{{ tariff.id }}">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Дата заезда</label>
+                    <input type="date" name="check_in" id="check_in" required>
+                </div>
+                <div class="form-group">
+                    <label>Дата выезда</label>
+                    <input type="date" name="check_out" id="check_out" required>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+                <label style="font-weight: 600;">Количество гостей:</label>
+                <div class="guests-counter-booking">
+                    <button type="button" onclick="changeBookingGuests(-1)">−</button>
+                    <input type="text" name="guests" id="booking-guests" value="2" readonly>
+                    <button type="button" onclick="changeBookingGuests(1)">+</button>
+                </div>
+                <small style="color: var(--text-gray);" id="guest-warning"></small>
+            </div>
+
+            <button type="submit" class="btn-submit-booking" style="margin-top: 1.5rem;">Подтвердить бронирование</button>
+        </form>
+    </div>
+
+    <!-- Корзина -->
+    <div class="booking-summary" id="summary">
+        <h3>Детали бронирования</h3>
+        <div class="summary-row"><span>Отель</span><span style="font-weight:500;">{{ hotel.name }}</span></div>
+        <div class="summary-row"><span>Тариф</span><span>{{ tariff.name }}</span></div>
+        <div class="summary-row"><span>Даты</span><span id="summary-dates">—</span></div>
+        <div class="summary-row"><span>Ночей</span><span id="summary-nights">—</span></div>
+        <div class="summary-row"><span>Взрослых</span><span id="summary-guests">2</span></div>
+        <div class="summary-row"><span>Цена за ночь</span><span id="summary-price-per-night">—</span></div>
+        <div class="summary-row total"><span>Итого</span><span id="summary-total" style="color: var(--primary-orange);">—</span></div>
+    </div>
+</div>
+
+<script>
+// Галерея тарифа
+var bookingTariffTrack = document.querySelector('.booking-tariff-track');
+var bookingTariffSlides = bookingTariffTrack ? bookingTariffTrack.children.length : 0;
+var bookingTariffCurrent = 0;
+
+function prevBookingTariff() {
+    bookingTariffCurrent = (bookingTariffCurrent - 1 + bookingTariffSlides) % bookingTariffSlides;
+    bookingTariffTrack.style.transform = 'translateX(-' + (bookingTariffCurrent * 100) + '%)';
+    updateBookingTariffDots();
+}
+
+function nextBookingTariff() {
+    bookingTariffCurrent = (bookingTariffCurrent + 1) % bookingTariffSlides;
+    bookingTariffTrack.style.transform = 'translateX(-' + (bookingTariffCurrent * 100) + '%)';
+    updateBookingTariffDots();
+}
+
+function goToBookingTariff(index) {
+    bookingTariffCurrent = index;
+    bookingTariffTrack.style.transform = 'translateX(-' + (index * 100) + '%)';
+    updateBookingTariffDots();
+}
+
+function updateBookingTariffDots() {
+    var dots = document.querySelectorAll('.booking-tariff-dot');
+    dots.forEach(function(dot, i) {
+        dot.classList.toggle('active', i === bookingTariffCurrent);
+        dot.style.background = i === bookingTariffCurrent ? 'white' : 'rgba(255,255,255,0.5)';
+        dot.style.transform = i === bookingTariffCurrent ? 'scale(1.3)' : 'scale(1)';
+    });
+}
+
+// Счётчик гостей и корзина
+var guestsInput = document.getElementById('booking-guests');
+var guestWarning = document.getElementById('guest-warning');
+var currentGuests = 2;
+var maxGuests = {{ tariff.max_guests }};
+var pricePerPerson = {{ tariff.price_per_night }};
+
+function changeBookingGuests(delta) {
+    var newVal = currentGuests + delta;
+    if (newVal < 1) newVal = 1;
+    if (newVal > 6) newVal = 6;
+    currentGuests = newVal;
+    guestsInput.value = newVal;
+
+    if (currentGuests > maxGuests) {
+        guestWarning.textContent = '⚠️ Максимум ' + maxGuests + ' гостей для этого тарифа';
+    } else {
+        guestWarning.textContent = '';
+    }
+    updateSummary();
+}
+
+function updateSummary() {
+    var checkIn = document.getElementById('check_in').value;
+    var checkOut = document.getElementById('check_out').value;
+    var nights = 0;
+    if (checkIn && checkOut) {
+        var d1 = new Date(checkIn);
+        var d2 = new Date(checkOut);
+        nights = Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)));
+    }
+
+    document.getElementById('summary-dates').textContent = checkIn && checkOut ? checkIn + ' → ' + checkOut : '—';
+    document.getElementById('summary-nights').textContent = nights + ' ночей';
+    document.getElementById('summary-guests').textContent = currentGuests;
+
+    var pricePerNight = pricePerPerson * currentGuests;
+    document.getElementById('summary-price-per-night').textContent = pricePerNight.toLocaleString() + ' ₽';
+    document.getElementById('summary-total').textContent = (nights * pricePerNight).toLocaleString() + ' ₽';
+}
+
+var today = new Date().toISOString().split('T')[0];
+var tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+document.getElementById('check_in').value = today;
+document.getElementById('check_in').min = today;
+document.getElementById('check_out').value = tomorrow;
+document.getElementById('check_out').min = tomorrow;
+
+document.getElementById('check_in').addEventListener('change', function() {
+    var nextDay = new Date(this.value);
+    nextDay.setDate(nextDay.getDate() + 1);
+    document.getElementById('check_out').min = nextDay.toISOString().split('T')[0];
+    if (document.getElementById('check_out').value <= this.value) {
+        document.getElementById('check_out').value = nextDay.toISOString().split('T')[0];
+    }
+    updateSummary();
+});
+document.getElementById('check_out').addEventListener('change', updateSummary);
+updateSummary();
+</script>
+{% endblock %}

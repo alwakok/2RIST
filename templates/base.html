@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}2RIST - Туры и отели{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <nav class="nav-menu">
+                <a href="{{ url_for('index') }}">Главная</a>
+                <a href="{{ url_for('hotels') }}">Отели</a>
+                {% if session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin_panel') }}">Админ-панель</a>
+                {% endif %}
+            </nav>
+            
+            <div class="header-actions">
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('profile') }}" class="header-link">👤 Профиль</a>
+<a href="{{ url_for('my_bookings') }}" class="header-link">📋 Бронирования</a>
+                    <span class="user-info">{{ session.get('username') }}</span>
+                    <a href="{{ url_for('logout') }}" class="btn-login">Выйти</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-login">Войти</a>
+                    <a href="{{ url_for('register') }}" class="btn-register">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div id="notifications-container" class="notifications-container"></div>
+
+    {% if not hide_hero %}
+    <section class="hero-fullwidth" id="hero-section">
+        <div class="hero-content">
+            <div class="hero-logo">
+                <h1>2<span>RIST</span></h1>
+                {% if request.endpoint == 'index' %}
+                <p class="hero-slogan" id="hero-slogan">Откройте мир с нами — ваш идеальный отдых начинается здесь</p>
+                {% endif %}
+            </div>
+
+            <div class="search-block">
+                <div class="search-tabs">
+                    <span class="search-tab active">Поиск отелей</span>
+                </div>
+
+                <form action="{{ url_for('hotels') }}" method="GET" class="search-form">
+                    <div class="search-fields">
+                        <div class="search-field" style="position: relative;">
+    <label>Страна, курорт или отель</label>
+    <input type="text" name="query" id="main-search" placeholder="Куда хотите поехать?" value="{{ request.args.get('query', request.args.get('country', '')) }}" autocomplete="off">
+    <div id="search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 0 0 8px 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); z-index: 100; max-height: 300px; overflow-y: auto; margin-top: 2px;"></div>
+</div>
+                        <div class="search-field">
+                            <label>Дата заезда</label>
+                            <input type="date" name="date_from" value="{{ request.args.get('date_from', '') }}">
+                        </div>
+                        <div class="search-field">
+                            <label>Дата выезда</label>
+                            <input type="date" name="date_to" value="{{ request.args.get('date_to', '') }}">
+                        </div>
+                        <div class="search-field">
+                            <label>Взрослые</label>
+                            <div class="guests-counter">
+                                <button type="button" class="guests-btn" onclick="changeGuests(-1)">−</button>
+                                <input type="text" name="guests" id="guests-input" value="{{ request.args.get('guests', '2') }}" readonly>
+                                <button type="button" class="guests-btn" onclick="changeGuests(1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-search">
+                        <i class="fas fa-search"></i> НАЙТИ ОТЕЛИ
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <div id="flash-messages" style="display: none;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div data-category="{{ category }}" data-message="{{ message }}"></div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div>
+                <h4>2RIST</h4>
+                <p>Интернет-магазин туров. Более 250 000 отелей по всему миру. Лучшие цены и надёжное бронирование.</p>
+            </div>
+            <div>
+                <h4>Контакты</h4>
+                <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
+                <p><i class="fas fa-envelope"></i> info@2rist.ru</p>
+                <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Тверская, 1</p>
+            </div>
+            <div>
+                <h4>Информация</h4>
+                <p><a href="{{ url_for('faq') }}">FAQ</a></p>
+                <p><a href="{{ url_for('how_to_book') }}">Как забронировать</a></p>
+                <p><a href="{{ url_for('payment_methods') }}">Способы оплаты</a></p>
+                <p><a href="{{ url_for('cancellation_policy') }}">Условия отмены</a></p>
+                <p><a href="{{ url_for('privacy_policy') }}">Политика конфиденциальности</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Смена фона -->
+    <script>
+// Смена фона
+const backgrounds = [
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80',
+    'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1920&q=80',
+    'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=1920&q=80',
+    'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=1920&q=80',
+    'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=1920&q=80',
+    'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1920&q=80',
+    'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1920&q=80',
+    'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1920&q=80'
+];
+
+const slogans = [
+    'Откройте мир с нами — ваш идеальный отдых начинается здесь',
+    'Путешествуйте с комфортом — лучшие отели по всему миру',
+    'Ваш отдых — наша забота. Бронируйте мечту уже сегодня',
+    'Роскошный отдых по доступным ценам — только у нас',
+    'Погрузитесь в мир путешествий с 2RIST',
+    'Незабываемые впечатления начинаются с правильного отеля'
+];
+
+const heroSection = document.getElementById('hero-section');
+const heroSlogan = document.getElementById('hero-slogan');
+
+if (heroSection) {
+    const randomBg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.5)), url('${randomBg}')`;
+}
+
+if (heroSlogan) {
+    const randomSlogan = slogans[Math.floor(Math.random() * slogans.length)];
+    heroSlogan.textContent = randomSlogan;
+    heroSlogan.style.animation = 'none';
+    heroSlogan.offsetHeight;
+    heroSlogan.style.animation = 'fadeInUp 0.8s ease-out';
+}
+</script>
+
+    <script>
+    function changeGuests(delta) {
+        const input = document.getElementById('guests-input');
+        if (!input) return;
+        let current = parseInt(input.value) || 2;
+        current += delta;
+        if (current < 1) current = 1;
+        if (current > 6) current = 6;
+        input.value = current;
+        const minusBtn = document.querySelector('.guests-btn:first-child');
+        const plusBtn = document.querySelector('.guests-btn:last-child');
+        if (minusBtn) { minusBtn.disabled = current <= 1; minusBtn.style.opacity = current <= 1 ? '0.4' : '1'; }
+        if (plusBtn) { plusBtn.disabled = current >= 6; plusBtn.style.opacity = current >= 6 ? '0.4' : '1'; }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('guests-input');
+        if (input) {
+            const current = parseInt(input.value) || 2;
+            const minusBtn = document.querySelector('.guests-btn:first-child');
+            const plusBtn = document.querySelector('.guests-btn:last-child');
+            if (minusBtn) { minusBtn.disabled = current <= 1; minusBtn.style.opacity = current <= 1 ? '0.4' : '1'; }
+            if (plusBtn) { plusBtn.disabled = current >= 6; plusBtn.style.opacity = current >= 6 ? '0.4' : '1'; }
+        }
+    });
+    </script>
+    <script src="{{ url_for('static', filename='script/script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

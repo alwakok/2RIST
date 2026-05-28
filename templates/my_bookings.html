@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Мои бронирования | 2RIST{% endblock %}
+
+{% block hero_small %}1{% endblock %}
+
+{% block content %}
+<h2 class="section-title">Мои бронирования</h2>
+
+{% if bookings %}
+<div class="bookings-list">
+    {% for booking in bookings %}
+    <div class="booking-card">
+        <div>
+            <h4 style="margin-bottom: 0.3rem;">{{ booking.hotel.name }}</h4>
+            <p style="color: var(--text-gray); font-size: 0.85rem;">
+                {{ booking.hotel.city }}, {{ booking.hotel.country }}
+            </p>
+            <p style="font-size: 0.85rem; color: var(--text-gray); margin-top: 0.3rem;">
+                📅 {{ booking.check_in.strftime('%d.%m.%Y') }} → {{ booking.check_out.strftime('%d.%m.%Y') }}
+                ({{ (booking.check_out - booking.check_in).days }} ночей)
+            </p>
+            <p style="font-size: 0.85rem; color: var(--text-gray);">
+                🏷️ {{ booking.tariff.name }} · 👤 {{ booking.guests }} гостей
+            </p>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">
+                {{ "%.0f"|format(booking.total_price)|int }} ₽
+            </div>
+            <span class="booking-status-badge status-{{ booking.status }}">
+                {% if booking.status == 'pending' %}⏳ Ожидает оплаты
+                {% elif booking.status == 'paid' %}✅ Оплачено
+                {% elif booking.status == 'cancelled' %}❌ Отменено
+                {% endif %}
+            </span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="text-align: center; padding: 4rem; background: white; border-radius: 8px;">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">📋</div>
+    <h3>Нет бронирований</h3>
+    <p style="color: var(--text-gray); margin-bottom: 1.5rem;">Вы ещё ничего не забронировали</p>
+    <a href="{{ url_for('hotels') }}" class="btn-submit-booking" style="text-decoration: none; display: inline-block; width: auto; padding: 0.8rem 2rem;">
+        Найти отель
+    </a>
+</div>
+{% endif %}
+{% endblock %}

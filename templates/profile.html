@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Личный кабинет | 2RIST{% endblock %}
+{% block content %}
+<div class="breadcrumbs">
+    <a href="{{ url_for('index') }}">Главная</a> /
+    Личный кабинет
+</div>
+
+<div style="max-width: 800px; margin: 0 auto;">
+    <h1 class="section-title">Личный кабинет</h1>
+    
+    <!-- Навигация -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <a href="{{ url_for('profile') }}" class="btn-book" style="width: auto; padding: 0.6rem 1.5rem; background: var(--primary-orange);">👤 Профиль</a>
+        <a href="{{ url_for('my_bookings') }}" class="btn-book" style="width: auto; padding: 0.6rem 1.5rem; background: var(--primary-blue);">📋 Мои бронирования</a>
+    </div>
+    
+    <div style="background: white; border-radius: 20px; padding: 2rem; box-shadow: var(--shadow);">
+        <!-- Аватар -->
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="width: 80px; height: 80px; background: var(--gradient-1); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; font-weight: 700; margin-bottom: 0.5rem;">
+                {{ (user.full_name or user.username)[:1]|upper }}
+            </div>
+            <h3 style="font-size: 1.2rem;">{{ user.full_name or user.username }}</h3>
+            <p style="color: var(--text-gray); font-size: 0.9rem;">{{ user.email }}</p>
+            <p style="color: var(--text-light); font-size: 0.8rem;">На сайте с {{ user.created_at.strftime('%d.%m.%Y') }}</p>
+        </div>
+        
+        <!-- Форма редактирования -->
+        <form method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Имя и фамилия</label>
+                    <input type="text" name="full_name" value="{{ user.full_name or '' }}" placeholder="Иван Иванов">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ user.email }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="tel" name="phone" value="{{ user.phone or '' }}" placeholder="+7 (999) 123-45-67">
+                </div>
+                
+                <div class="form-group">
+                    <label>Дата рождения</label>
+                    <input type="date" name="birth_date" value="{{ user.birth_date.strftime('%Y-%m-%d') if user.birth_date else '' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label>Пол</label>
+                    <select name="gender">
+                        <option value="" {% if not user.gender %}selected{% endif %}>Не указан</option>
+                        <option value="male" {% if user.gender == 'male' %}selected{% endif %}>Мужской</option>
+                        <option value="female" {% if user.gender == 'female' %}selected{% endif %}>Женский</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Страна</label>
+                    <input type="text" name="country" value="{{ user.country or '' }}" placeholder="Россия">
+                </div>
+                
+                <div class="form-group">
+                    <label>Город</label>
+                    <input type="text" name="city" value="{{ user.city or '' }}" placeholder="Москва">
+                </div>
+            </div>
+            
+            <!-- Статистика -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+                <div style="background: #F7F9FC; padding: 1rem; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-orange);">{{ user.bookings|length }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-gray);">бронирований</div>
+                </div>
+                <div style="background: #F7F9FC; padding: 1rem; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-orange);">{{ user.reviews|length }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-gray);">отзывов</div>
+                </div>
+                <div style="background: #F7F9FC; padding: 1rem; border-radius: 10px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-orange);">{{ user.age if user.age else '—' }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-gray);">лет</div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-submit">💾 Сохранить изменения</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

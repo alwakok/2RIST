@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Вход | 2RIST{% endblock %}
+
+{% block hero_small %}1{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-form">
+        <h2>Вход в личный кабинет</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label>Логин</label>
+                <input type="text" name="username" required placeholder="Введите логин">
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" name="password" required placeholder="Введите пароль">
+            </div>
+            <button type="submit" class="btn-submit">Войти</button>
+        </form>
+        <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: var(--text-gray);">
+            Нет аккаунта? <a href="{{ url_for('register') }}" style="color: var(--primary-orange);">Зарегистрироваться</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
